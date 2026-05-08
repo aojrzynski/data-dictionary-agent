@@ -1,0 +1,6 @@
+contact_id,first_name,last_name,email,phone,account_id,job_title,department,created_date,last_modified_date,lead_source,status,notes
+C1001,Ava,Nguyen,ava.nguyen@example.com,555-0101,A2001,Sales Manager,Sales,2024-01-05,2024-03-01,Web,Active,High intent lead
+C1002,Liam,Patel,liam.patel@example.com,555-0102,A2002,Data Analyst,Analytics,2024-01-09,2024-03-08,Referral,Active,Asked for pricing sheet
+C1003,Sophia,Garcia,sophia.garcia@example.com,555-0103,A2003,Operations Lead,Operations,2024-02-12,2024-03-12,Event,Prospect,Interested in pilot
+C1004,Noah,Kim,noah.kim@example.com,555-0104,A2004,IT Director,IT,2024-02-25,2024-03-17,Partner,Active,Follow up next quarter
+C1005,Mia,Johnson,mia.johnson@example.com,555-0105,A2005,Finance Controller,Finance,2024-03-03,2024-03-20,Web,Inactive,No response after demo

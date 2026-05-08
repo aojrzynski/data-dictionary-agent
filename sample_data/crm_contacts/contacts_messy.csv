@@ -1,0 +1,6 @@
+contact_id,first_name,last_name,email,phone,account_id,job_title,department,created_date,last_modified_date,lead_source,status,notes
+C2001, Emma ,Lopez,emma.lopez@example.com,555-0201,A3001,Engineer,Product,2024-01-05,2024-02-01,Web,Active,good lead
+C2002,,Singh, ,555-0202,A3002,Engineer,Product,01/20/2024,2024-02-05,Referral,Active, 
+C2002,Olivia,Singh,olivia.singh@example.com, ,A3002,Senior Engineer,Product,2024-01-20,not_a_date,referral,active,needs cleanup
+ ,Ethan,Reed,ethan.reed@example.com,555-0204, ,Manager,Operations,2024/02/01,2024-02-12,Event,Prospect,mixed values 123
+C2005,Noah,Kim,noah.kim@example.com,555-0205,A3005,Director,IT, ,2024-02-20,Partner, ,duplicate-like id seen?

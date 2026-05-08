@@ -1,0 +1,6 @@
+asset_id,asset_name,asset_type,install_date,site_code,postcode,operational_status,criticality,replacement_cost,last_inspection_date,maintenance_notes
+A9001,Core Router 01,Router,2021-04-10,NYC-01,10001,Operational,High,12500.00,2024-02-15,Firmware updated
+A9002,Edge Switch 22,Switch,2020-11-03,SFO-02,94105,Operational,Medium,3200.00,2024-01-30,Port 8 flaps intermittently
+A9003,Firewall Cluster A,Firewall,2019-07-21,CHI-03,60601,Maintenance,High,28000.00,2024-02-20,Vendor case open
+A9004,AP Floor 5-12,Access Point,2022-06-14,AUS-01,73301,Operational,Low,850.00,2024-03-01,No issues
+A9005,Load Balancer 3,Load Balancer,2018-09-09,BOS-04,02108,Retired,Medium,15000.00,2023-12-18,Pending disposal
