@@ -1,21 +1,18 @@
 # data-dictionary-agent
 
-A local-first, CLI-first project that profiles tabular datasets and emits deterministic trace artifacts.
+A local-first, CLI-first tool that profiles tabular datasets and produces deterministic first-pass data dictionary outputs.
 
 ## Why this exists
 
-Before you can generate a useful data dictionary, you need grounded evidence about what is actually in the data. This milestone builds that evidence layer first, and now adds deterministic semantic role suggestions.
+Before formal documentation, teams need grounded evidence about what is actually in a dataset. This project keeps deterministic profiling as the evidence layer, adds deterministic semantic suggestions, and generates review-friendly dictionary artifacts.
 
-## Why not just ask an LLM?
-
-LLMs can help explain findings, but they are not reliable as the source of truth for raw dataset structure. This project establishes deterministic profiling as the authority, then layers optional agent and LLM capabilities later.
-
-## Authority boundary (v2 direction)
+## Authority boundary
 
 - Deterministic profiler: authoritative structural evidence
 - Deterministic semantic inference: suggested roles only (not truth)
-- Future agent mode: orchestration over deterministic evidence
-- Future LLM descriptions: suggested wording only, never authoritative facts
+- Deterministic dictionary outputs: first-pass documentation artifacts
+- Future agent mode: not included yet
+- Future LLM descriptions: not included yet
 
 ## Quick start
 
@@ -30,20 +27,16 @@ python -m data_dictionary_agent.cli --input sample_data/crm_contacts/contacts_cl
 data-dictionary-agent --input sample_data/ecommerce_orders/orders.csv --output-dir outputs/orders_profile
 ```
 
-## Output artifact
+## Outputs
 
-- `profiling_trace.json`: dataset-level structural profiling plus column-level semantic inference fields (`semantic_role`, `semantic_role_confidence`, `semantic_role_reasons`, `review_required`, `review_notes`).
+- `profiling_trace.json` (deterministic evidence and semantic suggestions)
+- `data_dictionary.json` (structured dictionary)
+- `data_dictionary.csv` (spreadsheet-friendly dictionary)
+- `data_dictionary.md` (human-readable dictionary)
 
-## Project structure
+## Limitations
 
-- `src/data_dictionary_agent/`: package source (`cli.py`, `intake.py`, `profiling.py`, `semantic_inference.py`, `trace_writer.py`)
-- `sample_data/`: synthetic sample datasets
-- `docs/`: usage and interpretation documentation
-- `tests/`: pytest test suite
-- `outputs/`: generated artifacts
-
-## Limitations and non-goals (this milestone)
-
+- No config override rules yet
 - No agent mode yet
-- No LLM support yet
-- No final data dictionary outputs yet
+- No LLM-generated descriptions yet
+- No formal sensitive-data compliance classification

@@ -14,7 +14,7 @@ def test_trace_writer_writes_file(tmp_path: Path):
     assert loaded["row_count"] == 1
 
 
-def test_cli_runs_and_creates_trace(tmp_path: Path):
+def test_cli_runs_and_creates_trace_and_dictionary_outputs(tmp_path: Path):
     out_dir = tmp_path / "profile"
     cmd = [
         sys.executable,
@@ -28,6 +28,14 @@ def test_cli_runs_and_creates_trace(tmp_path: Path):
     result = subprocess.run(cmd, capture_output=True, text=True)
     assert result.returncode == 0, result.stderr
     trace_path = out_dir / "profiling_trace.json"
+    md_path = out_dir / "data_dictionary.md"
+    csv_path = out_dir / "data_dictionary.csv"
+    dict_json_path = out_dir / "data_dictionary.json"
     assert trace_path.exists()
+    assert md_path.exists()
+    assert csv_path.exists()
+    assert dict_json_path.exists()
     loaded = json.loads(trace_path.read_text(encoding="utf-8"))
     assert any(col.get("semantic_role") for col in loaded["columns"])
+    dict_loaded = json.loads(dict_json_path.read_text(encoding="utf-8"))
+    assert len(dict_loaded["columns"]) > 0

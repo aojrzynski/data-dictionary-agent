@@ -4,6 +4,8 @@
 2. Intake reads CSV/XLSX/XLSM into a pandas DataFrame.
 3. Profiling computes deterministic dataset and column physical facts.
 4. Semantic inference adds deterministic semantic role suggestions.
-5. Trace writer emits `profiling_trace.json`.
+5. Dictionary builder creates first-pass dictionary entries using deterministic templates.
+6. Output writers emit `data_dictionary.md`, `data_dictionary.csv`, and `data_dictionary.json`.
+7. Trace writer emits `profiling_trace.json`.
 
 No LLM calls or agent orchestration occur in this milestone.

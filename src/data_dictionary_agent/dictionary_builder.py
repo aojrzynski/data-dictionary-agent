@@ -1,0 +1,100 @@
+from __future__ import annotations
+
+from typing import Any
+
+
+DESCRIPTION_TEMPLATES = {
+    "identifier": "Likely identifier field for records or related entities. Confirm exact business meaning and key behaviour.",
+    "possible_sensitive": "Column name suggests possible personal or contact data. Review handling requirements before sharing or publishing.",
+    "date": "Date-like field inferred from values and/or column name. Confirm business meaning.",
+    "datetime": "Datetime-like field inferred from values and/or column name. Confirm timezone and business meaning.",
+    "numeric_measure": "Numeric measure-like field. Confirm unit, calculation logic, and expected range.",
+    "categorical": "Categorical field with a limited set of observed values. Confirm allowed values and definitions.",
+    "boolean_flag": "Boolean or flag-like field. Confirm true/false meaning.",
+    "free_text": "Free-text or notes-like field. Review examples to confirm intended use.",
+    "unknown": "Business meaning could not be inferred confidently from deterministic evidence.",
+}
+
+
+def _to_display_name(column_name: str) -> str:
+    words = str(column_name).replace("_", " ").strip().split()
+    out: list[str] = []
+    for word in words:
+        if word.lower() == "id":
+            out.append("ID")
+        else:
+            out.append(word.capitalize())
+    return " ".join(out)
+
+
+def _description_for(role: str, review_required: bool) -> tuple[str, str]:
+    if review_required and role == "unknown":
+        return "", "blank_review_required"
+    return DESCRIPTION_TEMPLATES.get(role, DESCRIPTION_TEMPLATES["unknown"]), "deterministic_template"
+
+
+def build_data_dictionary(profile: dict[str, Any]) -> dict[str, Any]:
+    entries: list[dict[str, Any]] = []
+    for column in profile.get("columns", []):
+        role = column.get("semantic_role", "unknown")
+        review_required = bool(column.get("review_required", False))
+        description, description_source = _description_for(role, review_required)
+        caveats = list(column.get("notes", [])) + list(column.get("review_notes", []))
+
+        if column.get("semantic_role_confidence") == "low":
+            caveats.append("Field requires review because semantic confidence is low.")
+        if role == "identifier" and float(column.get("uniqueness_ratio", 0.0) or 0.0) < 0.95:
+            caveats.append("Identifier-like field is not unique.")
+        if role == "possible_sensitive":
+            caveats.append("Possible sensitive field; classification requires human review.")
+        if column.get("inferred_physical_type") == "mixed_or_unknown":
+            caveats.append("Physical type is mixed_or_unknown.")
+
+        entry = {
+            "column_name": column.get("column_name"),
+            "display_name": _to_display_name(str(column.get("column_name", ""))),
+            "description": description,
+            "description_source": description_source,
+            "physical_type": column.get("inferred_physical_type"),
+            "semantic_role": role,
+            "semantic_role_confidence": column.get("semantic_role_confidence"),
+            "nullable": int(column.get("null_count", 0)) > 0,
+            "null_count": column.get("null_count", 0),
+            "null_ratio": column.get("null_ratio", 0.0),
+            "distinct_count": column.get("distinct_count", 0),
+            "uniqueness_ratio": column.get("uniqueness_ratio", 0.0),
+            "sample_values": list(column.get("sample_values", [])),
+            "top_values": list(column.get("top_values", [])),
+            "min_value": column.get("min_value"),
+            "max_value": column.get("max_value"),
+            "review_required": review_required,
+            "review_notes": list(column.get("review_notes", [])),
+            "caveats": list(dict.fromkeys(caveats)),
+        }
+        entries.append(entry)
+
+    summary_counts = {
+        "columns_needing_review": sum(1 for e in entries if e["review_required"]),
+        "possible_sensitive_fields": sum(1 for e in entries if e["semantic_role"] == "possible_sensitive"),
+        "identifier_like_fields": sum(1 for e in entries if e["semantic_role"] == "identifier"),
+        "date_datetime_fields": sum(1 for e in entries if e["semantic_role"] in {"date", "datetime"}),
+        "numeric_measures": sum(1 for e in entries if e["semantic_role"] == "numeric_measure"),
+        "categorical_fields": sum(1 for e in entries if e["semantic_role"] == "categorical"),
+    }
+
+    return {
+        "dataset": {
+            "source_file": profile.get("file_name"),
+            "input_path": profile.get("input_path"),
+            "file_type": profile.get("file_type"),
+            "sheet": profile.get("sheet_name"),
+            "rows": profile.get("row_count", 0),
+            "columns": profile.get("column_count", 0),
+            "generated_at": profile.get("generated_at_utc"),
+        },
+        "columns": entries,
+        "summary_counts": summary_counts,
+        "review_item_counts": {
+            "review_required": summary_counts["columns_needing_review"],
+        },
+    }
