@@ -34,6 +34,14 @@ data-dictionary-agent --input sample_data/ecommerce_orders/orders.csv --output-d
 
 - `profiling_trace.json`: dataset-level structural profiling plus column-level semantic inference fields (`semantic_role`, `semantic_role_confidence`, `semantic_role_reasons`, `review_required`, `review_notes`).
 
+## Project structure
+
+- `src/data_dictionary_agent/`: package source (`cli.py`, `intake.py`, `profiling.py`, `semantic_inference.py`, `trace_writer.py`)
+- `sample_data/`: synthetic sample datasets
+- `docs/`: usage and interpretation documentation
+- `tests/`: pytest test suite
+- `outputs/`: generated artifacts
+
 ## Limitations and non-goals (this milestone)
 
 - No agent mode yet

@@ -1,3 +1,4 @@
+import warnings
 import pandas as pd
 
 from data_dictionary_agent.profiling import build_profile
@@ -86,3 +87,19 @@ def test_semantic_fields_exist_on_every_column():
         assert "semantic_role_reasons" in col
         assert "review_required" in col
         assert "review_notes" in col
+
+
+def test_build_profile_does_not_emit_datetime_infer_warning():
+    df = pd.DataFrame({"text_col": ["alpha", "beta", "gamma"], "other_col": ["x", "y", "z"]})
+    metadata = {
+        "input_path": "dummy.csv",
+        "file_name": "dummy.csv",
+        "file_type": "csv",
+        "sheet_name": None,
+    }
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        build_profile(df, metadata)
+
+    assert not any("Could not infer format" in str(w.message) for w in caught)
