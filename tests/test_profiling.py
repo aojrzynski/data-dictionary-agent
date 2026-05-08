@@ -47,3 +47,25 @@ def test_column_profile_fields_and_type_detection():
     assert by_name["text_col"]["null_count"] == 0
     assert by_name["text_col"]["distinct_count"] == 2
     assert len(by_name["text_col"]["sample_values"]) == 2
+
+
+def test_string_dtype_boolean_inference_and_blank_handling():
+    df = pd.DataFrame(
+        {
+            "bool_string_col": pd.Series(["yes", "no", "yes"], dtype="string"),
+            "blank_string_col": pd.Series([" ", "", None], dtype="string"),
+        }
+    )
+    metadata = {
+        "input_path": "dummy.csv",
+        "file_name": "dummy.csv",
+        "file_type": "csv",
+        "sheet_name": None,
+    }
+
+    profile = build_profile(df, metadata)
+    by_name = {col["column_name"]: col for col in profile["columns"]}
+
+    assert by_name["bool_string_col"]["inferred_physical_type"] == "boolean"
+    assert by_name["blank_string_col"]["inferred_physical_type"] == "empty"
+    assert by_name["blank_string_col"]["null_count"] == 3
