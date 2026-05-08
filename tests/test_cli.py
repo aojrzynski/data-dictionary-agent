@@ -1,0 +1,31 @@
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+from data_dictionary_agent.trace_writer import write_profiling_trace
+
+
+def test_trace_writer_writes_file(tmp_path: Path):
+    profile = {"row_count": 1, "columns": []}
+    output_path = write_profiling_trace(profile, tmp_path)
+    assert output_path.exists()
+    loaded = json.loads(output_path.read_text(encoding="utf-8"))
+    assert loaded["row_count"] == 1
+
+
+def test_cli_runs_and_creates_trace(tmp_path: Path):
+    out_dir = tmp_path / "profile"
+    cmd = [
+        sys.executable,
+        "-m",
+        "data_dictionary_agent.cli",
+        "--input",
+        "sample_data/crm_contacts/contacts_clean.csv",
+        "--output-dir",
+        str(out_dir),
+    ]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    trace_path = out_dir / "profiling_trace.json"
+    assert trace_path.exists()
