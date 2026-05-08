@@ -1,3 +1,4 @@
+import warnings
 import pandas as pd
 
 from data_dictionary_agent.profiling import build_profile
@@ -69,3 +70,36 @@ def test_string_dtype_boolean_inference_and_blank_handling():
     assert by_name["bool_string_col"]["inferred_physical_type"] == "boolean"
     assert by_name["blank_string_col"]["inferred_physical_type"] == "empty"
     assert by_name["blank_string_col"]["null_count"] == 3
+
+
+def test_semantic_fields_exist_on_every_column():
+    df = pd.DataFrame({"contact_id": ["C1", "C2"], "status": ["new", "active"]})
+    metadata = {
+        "input_path": "dummy.csv",
+        "file_name": "dummy.csv",
+        "file_type": "csv",
+        "sheet_name": None,
+    }
+    profile = build_profile(df, metadata)
+    for col in profile["columns"]:
+        assert "semantic_role" in col
+        assert "semantic_role_confidence" in col
+        assert "semantic_role_reasons" in col
+        assert "review_required" in col
+        assert "review_notes" in col
+
+
+def test_build_profile_does_not_emit_datetime_infer_warning():
+    df = pd.DataFrame({"text_col": ["alpha", "beta", "gamma"], "other_col": ["x", "y", "z"]})
+    metadata = {
+        "input_path": "dummy.csv",
+        "file_name": "dummy.csv",
+        "file_type": "csv",
+        "sheet_name": None,
+    }
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        build_profile(df, metadata)
+
+    assert not any("Could not infer format" in str(w.message) for w in caught)
