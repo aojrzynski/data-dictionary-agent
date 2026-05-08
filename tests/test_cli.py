@@ -29,3 +29,5 @@ def test_cli_runs_and_creates_trace(tmp_path: Path):
     assert result.returncode == 0, result.stderr
     trace_path = out_dir / "profiling_trace.json"
     assert trace_path.exists()
+    loaded = json.loads(trace_path.read_text(encoding="utf-8"))
+    assert any(col.get("semantic_role") for col in loaded["columns"])

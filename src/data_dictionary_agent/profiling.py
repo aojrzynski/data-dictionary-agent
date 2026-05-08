@@ -2,8 +2,12 @@ from __future__ import annotations
 
 from collections import Counter
 from datetime import datetime, timezone
+import re
+import warnings
 
 import pandas as pd
+
+from data_dictionary_agent.semantic_inference import infer_semantic_metadata
 
 PROFILER_VERSION = "0.1.0"
 
@@ -21,6 +25,41 @@ def _clean_series_for_nulls(series: pd.Series) -> pd.Series:
         s = series.map(lambda x: x.strip() if isinstance(x, str) else x)
         return s.replace("", pd.NA)
     return series
+
+
+DATE_PATTERNS = [
+    "%Y-%m-%d",
+    "%Y/%m/%d",
+    "%d/%m/%Y",
+    "%m/%d/%Y",
+    "%Y-%m-%d %H:%M:%S",
+    "%Y-%m-%dT%H:%M:%S",
+]
+
+
+def _is_date_like_string(value: str) -> bool:
+    s = value.strip()
+    if not s:
+        return False
+    return bool(re.match(r"^\d{4}[-/]\d{1,2}[-/]\d{1,2}(?:[ T]\d{1,2}:\d{2}(?::\d{2})?)?$", s) or re.match(r"^\d{1,2}/\d{1,2}/\d{4}$", s))
+
+
+def _can_parse_all_as_datetime(non_null: pd.Series) -> bool:
+    values = [str(v).strip() for v in non_null]
+    if not values or not all(_is_date_like_string(v) for v in values):
+        return False
+
+    for fmt in DATE_PATTERNS:
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", message="Could not infer format")
+            parsed = pd.to_datetime(non_null, format=fmt, errors="coerce")
+        if parsed.notna().all():
+            return True
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="Could not infer format")
+        parsed = pd.to_datetime(non_null, errors="coerce")
+    return parsed.notna().all()
 
 
 def _infer_physical_type(series: pd.Series) -> str:
@@ -52,8 +91,7 @@ def _infer_physical_type(series: pd.Series) -> str:
             return "integer"
         return "decimal"
 
-    parsed_dates = pd.to_datetime(non_null, errors="coerce")
-    if parsed_dates.notna().all():
+    if _can_parse_all_as_datetime(non_null):
         return "date_or_datetime"
 
     kinds = Counter()
@@ -65,7 +103,7 @@ def _infer_physical_type(series: pd.Series) -> str:
             kinds["boolean"] += 1
         elif pd.to_numeric(pd.Series([sval]), errors="coerce").notna().all():
             kinds["numeric"] += 1
-        elif pd.to_datetime(pd.Series([sval]), errors="coerce").notna().all():
+        elif _is_date_like_string(sval):
             kinds["date"] += 1
         else:
             kinds["text"] += 1
@@ -114,8 +152,7 @@ def build_profile(
         if inferred == "mixed_or_unknown":
             notes.append("Column contains multiple value patterns.")
 
-        column_profiles.append(
-            {
+        column_profile = {
                 "column_name": str(column),
                 "normalised_column_name": _normalise_column_name(str(column)),
                 "pandas_dtype": str(raw_series.dtype),
@@ -133,7 +170,8 @@ def build_profile(
                 "max_value": None if max_value is None else str(max_value),
                 "notes": notes,
             }
-        )
+        column_profile.update(infer_semantic_metadata(column_profile))
+        column_profiles.append(column_profile)
 
     return {
         "input_path": metadata["input_path"],

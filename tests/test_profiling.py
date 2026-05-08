@@ -69,3 +69,20 @@ def test_string_dtype_boolean_inference_and_blank_handling():
     assert by_name["bool_string_col"]["inferred_physical_type"] == "boolean"
     assert by_name["blank_string_col"]["inferred_physical_type"] == "empty"
     assert by_name["blank_string_col"]["null_count"] == 3
+
+
+def test_semantic_fields_exist_on_every_column():
+    df = pd.DataFrame({"contact_id": ["C1", "C2"], "status": ["new", "active"]})
+    metadata = {
+        "input_path": "dummy.csv",
+        "file_name": "dummy.csv",
+        "file_type": "csv",
+        "sheet_name": None,
+    }
+    profile = build_profile(df, metadata)
+    for col in profile["columns"]:
+        assert "semantic_role" in col
+        assert "semantic_role_confidence" in col
+        assert "semantic_role_reasons" in col
+        assert "review_required" in col
+        assert "review_notes" in col

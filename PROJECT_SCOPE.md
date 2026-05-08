@@ -1,4 +1,4 @@
-# Project Scope (Milestone 0/1)
+# Project Scope (Milestone 2)
 
 ## Included now
 
@@ -6,19 +6,20 @@
 - Local-first CLI for deterministic dataset profiling
 - CSV/XLSX/XLSM intake
 - Profiling trace generation to JSON
+- Deterministic semantic role inference at column level
 - Baseline tests and sample datasets
 
 ## Deliberately not included yet
 
 - Agent-mode orchestration
 - LLM integration
-- Semantic field-role inference
-- Sensitivity classification
+- Deep sensitivity/compliance classification
 - Final dictionary output formats (Markdown/CSV/JSON)
+- Config-based semantic override rules
 
 ## Future milestones (high level)
 
-- Semantic inference and override rules
 - Dictionary artifact generation
+- Configurable override/rules files
 - Bounded agent loop
 - Optional LLM-assisted phrasing
