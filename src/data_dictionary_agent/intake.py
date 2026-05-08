@@ -25,8 +25,9 @@ def load_dataset(input_path: str | Path, sheet: str | None = None) -> tuple[pd.D
         df = pd.read_csv(path)
         active_sheet = None
     else:
-        df = pd.read_excel(path, sheet_name=sheet if sheet else 0)
-        active_sheet = sheet if sheet else "first_sheet"
+        excel_file = pd.ExcelFile(path)
+        active_sheet = sheet if sheet else excel_file.sheet_names[0]
+        df = pd.read_excel(excel_file, sheet_name=active_sheet)
 
     metadata = {
         "input_path": str(path),

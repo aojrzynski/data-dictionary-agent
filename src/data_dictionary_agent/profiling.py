@@ -33,6 +33,9 @@ def _infer_physical_type(series: pd.Series) -> str:
     if pd.api.types.is_integer_dtype(non_null):
         return "integer"
     if pd.api.types.is_float_dtype(non_null):
+        numeric = pd.to_numeric(non_null, errors="coerce")
+        if numeric.notna().all() and (numeric % 1 == 0).all():
+            return "integer"
         return "decimal"
     if pd.api.types.is_bool_dtype(non_null):
         return "boolean"
@@ -99,16 +102,17 @@ def build_profile(
 
         min_value = None
         max_value = None
-        try:
-            non_null = s.dropna()
-            if not non_null.empty:
-                min_value = non_null.min()
-                max_value = non_null.max()
-        except Exception:
-            pass
 
         notes = []
         inferred = _infer_physical_type(raw_series)
+        if inferred in {"integer", "decimal", "date_or_datetime"}:
+            try:
+                non_null = s.dropna()
+                if not non_null.empty:
+                    min_value = non_null.min()
+                    max_value = non_null.max()
+            except Exception:
+                pass
         if inferred == "mixed_or_unknown":
             notes.append("Column contains multiple value patterns.")
 
