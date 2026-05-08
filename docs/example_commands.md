@@ -5,5 +5,11 @@ python -m data_dictionary_agent.cli --input sample_data/crm_contacts/contacts_cl
 ```
 
 ```bash
-data-dictionary-agent --input sample_data/asset_register/network_assets.csv --output-dir outputs/asset_profile --sample-size 3 --top-values-limit 3
+data-dictionary-agent --input sample_data/ecommerce_orders/orders.csv --output-dir outputs/orders_profile
 ```
+
+Expected output files in each output directory:
+- `profiling_trace.json`
+- `data_dictionary.md`
+- `data_dictionary.csv`
+- `data_dictionary.json`

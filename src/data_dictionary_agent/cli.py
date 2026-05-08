@@ -5,6 +5,8 @@ import sys
 
 from data_dictionary_agent.intake import load_dataset
 from data_dictionary_agent.profiling import build_profile
+from data_dictionary_agent.dictionary_builder import build_data_dictionary
+from data_dictionary_agent.output_writers import write_dictionary_outputs
 from data_dictionary_agent.trace_writer import write_profiling_trace
 
 
@@ -31,10 +33,15 @@ def main() -> int:
             top_values_limit=args.top_values_limit,
         )
         output_path = write_profiling_trace(profile, args.output_dir)
+        dictionary = build_data_dictionary(profile)
+        dictionary_paths = write_dictionary_outputs(dictionary, args.output_dir)
         print("profiling completed")
         print(f"rows: {profile['row_count']}")
         print(f"columns: {profile['column_count']}")
         print(f"profiling_trace: {output_path}")
+        print(f"data_dictionary_md: {dictionary_paths['data_dictionary_md']}")
+        print(f"data_dictionary_csv: {dictionary_paths['data_dictionary_csv']}")
+        print(f"data_dictionary_json: {dictionary_paths['data_dictionary_json']}")
         return 0
     except Exception as exc:
         print(f"error: {exc}", file=sys.stderr)

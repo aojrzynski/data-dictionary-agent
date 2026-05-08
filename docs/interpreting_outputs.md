@@ -1,16 +1,13 @@
 # Interpreting Outputs
 
-`profiling_trace.json` contains:
+- `profiling_trace.json`: deterministic evidence (dataset structure, column profiling, semantic suggestion signals).
+- `data_dictionary.json`: structured first-pass dictionary preserving lists (`sample_values`, `top_values`, `review_notes`, `caveats`).
+- `data_dictionary.csv`: spreadsheet-friendly flattened dictionary for tools like Excel.
+- `data_dictionary.md`: human-readable summary and column documentation for quick review.
 
-- Dataset metadata (rows, columns, names, source file info)
-- Column-level physical profiling (nulls, distinct counts, inferred physical type, sample values, top values)
-- Column-level semantic inference:
-  - `semantic_role`
-  - `semantic_role_confidence` (`high` / `medium` / `low`)
-  - `semantic_role_reasons` (deterministic evidence)
-  - `review_required` (whether manual review is recommended)
-  - `review_notes` (why review is needed)
+## Important caveats
 
-`possible_sensitive` is a lightweight hint based on deterministic patterns (primarily names), not a compliance classification or a confirmation of PII.
-
-Treat this artifact as structural evidence and deterministic suggestions for future dictionary generation.
+- This is a first-pass deterministic dictionary.
+- Semantic roles are suggestions, not confirmed business truth.
+- `possible_sensitive` is a hint, not formal compliance classification.
+- Human review is required before formal publication.
