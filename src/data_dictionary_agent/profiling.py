@@ -17,10 +17,9 @@ def _normalise_column_name(name: str) -> str:
 
 
 def _clean_series_for_nulls(series: pd.Series) -> pd.Series:
-    if series.dtype == object:
-        s = series.apply(lambda x: x.strip() if isinstance(x, str) else x)
-        s = s.replace("", pd.NA)
-        return s
+    if pd.api.types.is_object_dtype(series) or pd.api.types.is_string_dtype(series):
+        s = series.map(lambda x: x.strip() if isinstance(x, str) else x)
+        return s.replace("", pd.NA)
     return series
 
 
@@ -42,39 +41,38 @@ def _infer_physical_type(series: pd.Series) -> str:
     if pd.api.types.is_datetime64_any_dtype(non_null):
         return "date_or_datetime"
 
-    if non_null.dtype == object:
-        lowered = [str(v).strip().lower() for v in non_null]
-        unique_vals = set(lowered)
-        if unique_vals and unique_vals.issubset(TRUE_VALUES | FALSE_VALUES):
-            return "boolean"
+    lowered = [str(v).strip().lower() for v in non_null]
+    unique_vals = set(lowered)
+    if unique_vals and unique_vals.issubset(TRUE_VALUES | FALSE_VALUES):
+        return "boolean"
 
-        numeric = pd.to_numeric(non_null, errors="coerce")
-        if numeric.notna().all():
-            if (numeric % 1 == 0).all():
-                return "integer"
-            return "decimal"
+    numeric = pd.to_numeric(non_null, errors="coerce")
+    if numeric.notna().all():
+        if (numeric % 1 == 0).all():
+            return "integer"
+        return "decimal"
 
-        parsed_dates = pd.to_datetime(non_null, errors="coerce")
-        if parsed_dates.notna().mean() >= 0.8:
-            return "date_or_datetime"
+    parsed_dates = pd.to_datetime(non_null, errors="coerce")
+    if parsed_dates.notna().all():
+        return "date_or_datetime"
 
-        kinds = Counter()
-        for value in non_null:
-            sval = str(value).strip()
-            if not sval:
-                continue
-            if pd.to_numeric(pd.Series([sval]), errors="coerce").notna().all():
-                kinds["numeric"] += 1
-            elif pd.to_datetime(pd.Series([sval]), errors="coerce").notna().all():
-                kinds["date"] += 1
-            else:
-                kinds["text"] += 1
+    kinds = Counter()
+    for value in non_null:
+        sval = str(value).strip()
+        if not sval:
+            continue
+        if sval.lower() in TRUE_VALUES | FALSE_VALUES:
+            kinds["boolean"] += 1
+        elif pd.to_numeric(pd.Series([sval]), errors="coerce").notna().all():
+            kinds["numeric"] += 1
+        elif pd.to_datetime(pd.Series([sval]), errors="coerce").notna().all():
+            kinds["date"] += 1
+        else:
+            kinds["text"] += 1
 
-        if len(kinds) > 1:
-            return "mixed_or_unknown"
-        return "text"
-
-    return "mixed_or_unknown"
+    if len(kinds) > 1:
+        return "mixed_or_unknown"
+    return "text"
 
 
 def build_profile(
