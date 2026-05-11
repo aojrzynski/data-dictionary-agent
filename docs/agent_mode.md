@@ -20,3 +20,5 @@ python -m data_dictionary_agent.cli \
   --mode agent \
   --output-dir outputs/crm_contacts_agent
 ```
+
+LLM suggestions can be included in agent mode with `--llm-descriptions`, but remain optional and non-authoritative.

@@ -116,3 +116,44 @@ def write_agent_report(agent_report_text: str, output_dir: str | Path) -> Path:
     output_path = out_dir / "agent_report.md"
     output_path.write_text(agent_report_text, encoding="utf-8")
     return output_path
+
+
+def write_llm_safe_summary(summary: dict, output_dir: str | Path) -> Path:
+    out_dir = Path(output_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    output_path = out_dir / "llm_safe_summary.json"
+    output_path.write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return output_path
+
+
+def write_llm_description_suggestions_json(suggestions: dict, output_dir: str | Path) -> Path:
+    out_dir = Path(output_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    output_path = out_dir / "llm_description_suggestions.json"
+    output_path.write_text(json.dumps(suggestions, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return output_path
+
+
+def write_llm_description_suggestions_markdown(suggestions: dict, source_file: str, output_dir: str | Path) -> Path:
+    out_dir = Path(output_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    output_path = out_dir / "llm_description_suggestions.md"
+    lines = [
+        f"# LLM Description Suggestions: {source_file}","", "## Boundary",
+        "- LLM suggestions are wording suggestions only.",
+        "- Deterministic profiling remains the evidence source.",
+        "- Config descriptions are user-provided context and are not overwritten.",
+        "- Possible sensitive fields were redacted before LLM use.",
+        "- Human review is required.","", "## Summary",
+        f"- LLM requested: {suggestions.get('llm_requested')}",
+        f"- LLM used: {suggestions.get('llm_used')}",
+        f"- Model: {suggestions.get('model')}",
+        f"- Columns suggested: {len(suggestions.get('columns', []))}",
+        f"- Warnings: {' | '.join(suggestions.get('warnings', [])) if suggestions.get('warnings') else 'None'}", "", "## Suggestions", "",
+        "| Column | Current description source | Suggested description | Suggestion source | Review required |",
+        "|---|---|---|---|---|",
+    ]
+    for c in suggestions.get('columns', []):
+        lines.append(f"| {_escape_md(c.get('column_name'))} | {_escape_md(c.get('current_description_source'))} | {_escape_md(c.get('suggested_description'))} | {_escape_md(c.get('suggestion_source'))} | {c.get('review_required')} |")
+    output_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return output_path

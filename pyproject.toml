@@ -18,6 +18,9 @@ dependencies = [
 dev = [
   "pytest>=8.0.0",
 ]
+llm = [
+  "openai>=1.0.0",
+]
 
 [project.scripts]
 data-dictionary-agent = "data_dictionary_agent.cli:main"

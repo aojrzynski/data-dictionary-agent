@@ -7,12 +7,17 @@ from pathlib import Path
 from data_dictionary_agent.agent_reporting import build_agent_report
 from data_dictionary_agent.config import load_config
 from data_dictionary_agent.dictionary_builder import build_data_dictionary
+from data_dictionary_agent.constants import CONFIG_PROVENANCE_CAVEAT
+from data_dictionary_agent.llm_descriptions import generate_llm_description_suggestions
 from data_dictionary_agent.intake import load_dataset
 from data_dictionary_agent.output_writers import (
     write_agent_report,
     write_agent_trace,
     write_dictionary_outputs,
     write_suggested_overrides_yaml,
+    write_llm_safe_summary,
+    write_llm_description_suggestions_json,
+    write_llm_description_suggestions_markdown,
 )
 from data_dictionary_agent.planner import build_agent_plan
 from data_dictionary_agent.profiling import build_profile
@@ -20,7 +25,7 @@ from data_dictionary_agent.suggested_overrides import build_suggested_overrides
 from data_dictionary_agent.trace_writer import write_profiling_trace
 
 
-def run_agent(input_path: str, output_dir: str, sheet: str | None = None, config_path: str | None = None, sample_size: int = 5, top_values_limit: int = 5) -> dict:
+def run_agent(input_path: str, output_dir: str, sheet: str | None = None, config_path: str | None = None, sample_size: int = 5, top_values_limit: int = 5, llm_descriptions: bool = False, llm_model: str | None = None) -> dict:
     config = load_config(config_path)
     plan = build_agent_plan({"input_path": input_path}, config, {"sheet": sheet, "config_path": config_path})
 
@@ -37,13 +42,29 @@ def run_agent(input_path: str, output_dir: str, sheet: str | None = None, config
 
     review_items = []
     for c in dictionary.get("columns", []):
-        needs = c.get("review_required") or c.get("semantic_role") in {"unknown", "possible_sensitive"} or c.get("semantic_role_confidence") == "low" or bool(c.get("caveats"))
+        caveats = [cv for cv in c.get("caveats", []) if cv != CONFIG_PROVENANCE_CAVEAT]
+        identifier_not_unique = c.get("semantic_role") == "identifier" and (c.get("uniqueness_ratio") or 0) < 1
+        needs = c.get("review_required") or c.get("semantic_role") in {"unknown", "possible_sensitive"} or c.get("semantic_role_confidence") == "low" or c.get("physical_type") == "mixed_or_unknown" or identifier_not_unique or bool(caveats)
         if needs:
             review_items.append({
                 "column_name": c.get("column_name"),
-                "reason": "; ".join(c.get("review_notes") or c.get("caveats") or ["Review required by deterministic rules."]),
+                "reason": "; ".join(c.get("review_notes") or caveats or ["Review required by deterministic rules."]),
                 "suggested_action": "Confirm semantic role, description, and handling requirements.",
             })
+
+
+    llm_used = False
+    llm_source = "deterministic_fallback"
+    llm_paths = {}
+    if llm_descriptions:
+        safe_summary, suggestions = generate_llm_description_suggestions(dictionary, model=llm_model)
+        llm_used = suggestions.get("llm_used", False)
+        llm_source = suggestions.get("source", "deterministic_fallback")
+        llm_paths = {
+            "llm_safe_summary": str(write_llm_safe_summary(safe_summary, output_dir)),
+            "llm_description_suggestions_json": str(write_llm_description_suggestions_json(suggestions, output_dir)),
+            "llm_description_suggestions_md": str(write_llm_description_suggestions_markdown(suggestions, Path(input_path).name, output_dir)),
+        }
 
     agent_trace_path = Path(output_dir) / "agent_trace.json"
     agent_report_path = Path(output_dir) / "agent_report.md"
@@ -53,6 +74,7 @@ def run_agent(input_path: str, output_dir: str, sheet: str | None = None, config
         "suggested_overrides_yaml": str(suggested_path),
         "agent_trace": str(agent_trace_path),
         "agent_report": str(agent_report_path),
+        **llm_paths,
     }
 
     agent_trace = {
@@ -64,7 +86,7 @@ def run_agent(input_path: str, output_dir: str, sheet: str | None = None, config
         "decisions": [
             {"decision_id": "d1", "decision": "Config override usage", "rationale": "Config overrides were applied because --config was provided." if config_path else "Config overrides were not applied because --config was not provided.", "evidence": [config_path or "no config path"]},
             {"decision_id": "d2", "decision": "Suggested overrides generation", "rationale": "Suggested overrides were generated because review-required fields exist." if review_items else "Suggested overrides still emitted for consistency even when no review-required fields exist.", "evidence": [f"review_items={len(review_items)}"]},
-            {"decision_id": "d3", "decision": "LLM behavior", "rationale": "No LLM descriptions were generated because LLM support is not enabled in this milestone.", "evidence": ["deterministic pipeline only"]},
+            {"decision_id": "d3", "decision": "LLM behavior", "rationale": "LLM description suggestions were requested." if llm_descriptions else "LLM description suggestions were not requested.", "evidence": [f"llm_used={llm_used}", f"source={llm_source}"]},
         ],
         "assumptions": [
             {"assumption": "Deterministic profiling trace is authoritative evidence.", "reason": "Project boundary for milestone 5."}
@@ -74,7 +96,7 @@ def run_agent(input_path: str, output_dir: str, sheet: str | None = None, config
             {"caveat": "Semantic roles are suggestions.", "severity": "medium"},
             {"caveat": "Possible sensitive fields are hints, not compliance classification.", "severity": "high"},
             {"caveat": "Config overrides are user-provided context, not observed evidence.", "severity": "medium"},
-            {"caveat": "No LLM was used.", "severity": "low"},
+            {"caveat": "LLM suggestions are optional wording suggestions and require human review.", "severity": "low"},
         ],
         "review_items": review_items,
         "summary": {
