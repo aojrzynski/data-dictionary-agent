@@ -104,3 +104,13 @@ def test_cli_default_run_has_no_llm_files(tmp_path):
     result = subprocess.run(cmd, capture_output=True, text=True)
     assert result.returncode == 0
     assert not (out_dir / "llm_safe_summary.json").exists()
+
+
+def test_cli_llm_markdown_uses_source_filename(tmp_path, monkeypatch):
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    out_dir = tmp_path / "llm_name"
+    cmd = [sys.executable, "-m", "data_dictionary_agent.cli", "--input", "sample_data/crm_contacts/contacts_clean.csv", "--llm-descriptions", "--output-dir", str(out_dir)]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    assert result.returncode == 0
+    md = (out_dir / "llm_description_suggestions.md").read_text(encoding="utf-8")
+    assert "contacts_clean.csv" in md

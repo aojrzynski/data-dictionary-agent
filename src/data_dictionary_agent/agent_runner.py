@@ -7,7 +7,8 @@ from pathlib import Path
 from data_dictionary_agent.agent_reporting import build_agent_report
 from data_dictionary_agent.config import load_config
 from data_dictionary_agent.dictionary_builder import build_data_dictionary
-from data_dictionary_agent.llm_descriptions import CONFIG_PROVENANCE_CAVEAT, generate_llm_description_suggestions
+from data_dictionary_agent.constants import CONFIG_PROVENANCE_CAVEAT
+from data_dictionary_agent.llm_descriptions import generate_llm_description_suggestions
 from data_dictionary_agent.intake import load_dataset
 from data_dictionary_agent.output_writers import (
     write_agent_report,
@@ -42,7 +43,7 @@ def run_agent(input_path: str, output_dir: str, sheet: str | None = None, config
     review_items = []
     for c in dictionary.get("columns", []):
         caveats = [cv for cv in c.get("caveats", []) if cv != CONFIG_PROVENANCE_CAVEAT]
-        identifier_not_unique = c.get("semantic_role") == "identifier_like" and (c.get("uniqueness_ratio") or 0) < 1
+        identifier_not_unique = c.get("semantic_role") == "identifier" and (c.get("uniqueness_ratio") or 0) < 1
         needs = c.get("review_required") or c.get("semantic_role") in {"unknown", "possible_sensitive"} or c.get("semantic_role_confidence") == "low" or c.get("physical_type") == "mixed_or_unknown" or identifier_not_unique or bool(caveats)
         if needs:
             review_items.append({

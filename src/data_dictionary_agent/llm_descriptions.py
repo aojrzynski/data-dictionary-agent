@@ -5,8 +5,6 @@ from datetime import datetime, timezone
 
 from data_dictionary_agent.llm_client import request_llm_suggestions
 
-CONFIG_PROVENANCE_CAVEAT = "Semantic role was provided by config; confidence reflects user-provided context, not deterministic inference."
-
 
 def _truncate(v: object, limit: int = 80) -> object:
     s = str(v)
@@ -60,6 +58,7 @@ def generate_llm_description_suggestions(dictionary: dict, model: str | None = N
     fallback = build_deterministic_fallback_suggestions(dictionary, "Deterministic fallback was used.")
     parsed = fallback
     source = "deterministic_fallback"
+    llm_call_succeeded = llm_used
     if llm_used and text:
         try:
             candidate = json.loads(text)
@@ -67,9 +66,13 @@ def generate_llm_description_suggestions(dictionary: dict, model: str | None = N
                 parsed = candidate
                 source = "llm_suggested"
             else:
-                warnings.append("LLM response schema was invalid JSON structure; deterministic fallback suggestions were generated.")
+                warnings.append("LLM response schema was invalid; deterministic fallback suggestions were generated.")
+                llm_used = False
+                source = "deterministic_fallback"
         except Exception:
             warnings.append("LLM response was not valid JSON; deterministic fallback suggestions were generated.")
+            llm_used = False
+            source = "deterministic_fallback"
     by_name = {c.get("column_name"): c for c in parsed.get("columns", []) if c.get("column_name")}
     out_cols = []
     for c in dictionary.get("columns", []):
@@ -90,8 +93,8 @@ def generate_llm_description_suggestions(dictionary: dict, model: str | None = N
             "notes": pick.get("notes", []),
         })
     payload = {
-        "generated_at_utc": datetime.now(timezone.utc).isoformat(), "llm_requested": True, "llm_used": llm_used,
-        "model": chosen_model, "source": source if llm_used else "deterministic_fallback",
+        "generated_at_utc": datetime.now(timezone.utc).isoformat(), "llm_requested": True, "llm_call_succeeded": llm_call_succeeded, "llm_used": llm_used,
+        "model": chosen_model, "source": source,
         "data_boundary": "Only safe summaries were used. Raw row-level data was not sent.", "warnings": warnings, "columns": out_cols,
     }
     return summary, payload

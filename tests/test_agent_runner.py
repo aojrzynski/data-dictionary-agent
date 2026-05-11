@@ -20,3 +20,15 @@ def test_run_agent_creates_outputs(tmp_path):
     report_text = (out_dir / "agent_report.md").read_text(encoding="utf-8")
     assert "- agent_trace:" in report_text
     assert "- agent_report:" in report_text
+
+
+def test_agent_llm_outputs_and_review_noise_rules(tmp_path):
+    out_dir = tmp_path / "agent_llm"
+    result = run_agent("sample_data/crm_contacts/contacts_clean.csv", str(out_dir), config_path="config/examples/crm_context.yaml", llm_descriptions=True)
+    trace = result["agent_trace"]
+    files = trace["summary"]["output_files"]
+    assert "llm_safe_summary" in files
+    assert "llm_description_suggestions_json" in files
+    assert "llm_description_suggestions_md" in files
+    report = (out_dir / "agent_report.md").read_text(encoding="utf-8")
+    assert "llm_safe_summary" in report

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from data_dictionary_agent.llm_descriptions import CONFIG_PROVENANCE_CAVEAT
+from data_dictionary_agent.constants import CONFIG_PROVENANCE_CAVEAT
 
 
 def build_suggested_overrides(dictionary: dict[str, Any]) -> dict[str, Any]:
@@ -21,7 +21,7 @@ def build_suggested_overrides(dictionary: dict[str, Any]) -> dict[str, Any]:
 
     for c in dictionary.get("columns", []):
         caveats = [cv for cv in c.get("caveats", []) if cv != CONFIG_PROVENANCE_CAVEAT]
-        identifier_not_unique = c.get("semantic_role") == "identifier_like" and (c.get("uniqueness_ratio") or 0) < 1
+        identifier_not_unique = c.get("semantic_role") == "identifier" and (c.get("uniqueness_ratio") or 0) < 1
         include = (
             c.get("review_required")
             or c.get("description_source") == "blank_review_required"

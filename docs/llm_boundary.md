@@ -1,6 +1,9 @@
 # LLM boundary
-Only safe summaries are sent to the LLM, never raw row-level data.
-Possible sensitive fields are redacted in `llm_safe_summary.json`.
-If LLM access is unavailable, deterministic fallback suggestions are generated.
-LLM output is optional wording help and is not authoritative.
-All suggestions require human review.
+
+- Possible sensitive fields are redacted before LLM use.
+- Non-sensitive fields may include a small capped set of sample/top values.
+- Raw full rows are not sent.
+- Large payloads are avoided by capping/truncation.
+- The exact safe summary sent to the LLM path is written to `llm_safe_summary.json` for inspection.
+- If LLM is unavailable or output is invalid, deterministic fallback suggestions are generated.
+- LLM suggestions are optional wording help and are not authoritative.

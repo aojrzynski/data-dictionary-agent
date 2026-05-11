@@ -10,16 +10,14 @@
 - Bounded agent mode
 - `agent_trace.json`
 - `agent_report.md`
+- Optional LLM description suggestions
+- `llm_safe_summary.json`
+- `llm_description_suggestions.json`
+- `llm_description_suggestions.md`
 
 ## Still not included
 
-- LLM descriptions
 - Formal sensitive data classification
 - Data catalog publishing
 - Framework-based orchestration
-
-- Optional LLM description suggestions
-- llm_safe_summary.json
-- llm_description_suggestions.json
-- llm_description_suggestions.md
-
+- Automatic replacement of governed business definitions

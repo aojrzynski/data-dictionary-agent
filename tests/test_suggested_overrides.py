@@ -16,3 +16,13 @@ def test_unknown_and_sensitive_appear_in_suggestions(tmp_path):
 def test_clean_dictionary_produces_empty_columns():
     s = build_suggested_overrides({"dataset": {"source_file": "x.csv"}, "columns": []})
     assert s["columns"] == {}
+
+
+def test_identifier_non_unique_is_included_and_provenance_only_not_included():
+    dictionary = {"dataset": {"source_file": "x.csv"}, "columns": [
+        {"column_name": "id", "display_name": "ID", "description": "", "description_source": "deterministic_template", "semantic_role": "identifier", "semantic_role_confidence": "high", "uniqueness_ratio": 0.8, "physical_type": "string", "review_required": False, "review_notes": [], "caveats": []},
+        {"column_name": "cfg_only", "display_name": "Cfg Only", "description": "", "description_source": "deterministic_template", "semantic_role": "categorical", "semantic_role_confidence": "medium", "uniqueness_ratio": 0.1, "physical_type": "string", "review_required": False, "review_notes": [], "caveats": ["Semantic role was provided by config; confidence reflects user-provided context, not deterministic inference."]},
+    ]}
+    s = build_suggested_overrides(dictionary)
+    assert "id" in s["columns"]
+    assert "cfg_only" not in s["columns"]

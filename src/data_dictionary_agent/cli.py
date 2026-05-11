@@ -65,7 +65,7 @@ def main() -> int:
             safe_summary, suggestions = generate_llm_description_suggestions(dictionary, model=args.llm_model)
             safe_path = write_llm_safe_summary(safe_summary, args.output_dir)
             sugg_json_path = write_llm_description_suggestions_json(suggestions, args.output_dir)
-            sugg_md_path = write_llm_description_suggestions_markdown(suggestions, metadata.get("source_file", "unknown"), args.output_dir)
+            sugg_md_path = write_llm_description_suggestions_markdown(suggestions, dictionary.get("dataset", {}).get("source_file", "unknown"), args.output_dir)
             print(f"llm_safe_summary: {safe_path}")
             print(f"llm_description_suggestions_json: {sugg_json_path}")
             print(f"llm_description_suggestions_md: {sugg_md_path}")

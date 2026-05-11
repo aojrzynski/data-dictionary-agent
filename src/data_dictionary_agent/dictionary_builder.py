@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from data_dictionary_agent.config import get_column_overrides, get_dataset_overrides
+from data_dictionary_agent.constants import CONFIG_PROVENANCE_CAVEAT
 
 
 DESCRIPTION_TEMPLATES = {
@@ -50,7 +51,7 @@ def build_data_dictionary(profile: dict[str, Any], config: dict[str, Any] | None
         role_confidence = col_overrides.get("semantic_role_confidence", column.get("semantic_role_confidence"))
         if role_overridden and "semantic_role_confidence" not in col_overrides:
             role_confidence = "medium"
-            caveats.append("Semantic role was provided by config; confidence reflects user-provided context, not deterministic inference.")
+            caveats.append(CONFIG_PROVENANCE_CAVEAT)
 
         if column.get("semantic_role_confidence") == "low" and not role_overridden:
             caveats.append("Field requires review because semantic confidence is low.")
