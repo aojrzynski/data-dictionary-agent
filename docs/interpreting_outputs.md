@@ -13,3 +13,8 @@
 - Human review is required before formal publication.
 
 `suggested_overrides.yaml` contains editable dataset/column fields for human confirmation.
+
+
+## Agent outputs
+- `agent_trace.json`: structured plan, decisions, evidence, review items, and run summary.
+- `agent_report.md`: human-readable summary of what the agent did and what needs review.

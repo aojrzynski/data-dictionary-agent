@@ -2,7 +2,7 @@
 
 ## CLI layer
 
-`cli.py` parses command arguments and coordinates the end-to-end deterministic pipeline.
+`cli.py` parses command arguments and coordinates mode-specific execution.
 
 ## Intake layer
 
@@ -31,6 +31,8 @@
 - `data_dictionary.csv`
 - `data_dictionary.json`
 - `suggested_overrides.yaml`
+- `agent_trace.json`
+- `agent_report.md`
 
 ## Suggested overrides layer
 
@@ -39,3 +41,15 @@
 ## Trace writing layer
 
 `trace_writer.py` remains focused on `profiling_trace.json`.
+
+## Planner layer
+
+`planner.py` builds a simple deterministic plan for agent-mode runs.
+
+## Agent runner layer
+
+`agent_runner.py` orchestrates the deterministic pipeline, collects decisions/review items, and writes agent artifacts.
+
+## Agent reporting layer
+
+`agent_reporting.py` turns the agent trace into a readable Markdown report.

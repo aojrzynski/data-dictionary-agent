@@ -59,3 +59,30 @@ def test_cli_with_config_applies_override(tmp_path: Path):
     assert email["display_name_source"] == "config_override"
     assert "description_source" in email
     assert "semantic_role_source" in email
+
+
+def test_cli_agent_mode_creates_agent_artifacts(tmp_path: Path):
+    out_dir = tmp_path / "agent"
+    cmd = [sys.executable, "-m", "data_dictionary_agent.cli", "--input", "sample_data/crm_contacts/contacts_clean.csv", "--config", "config/examples/crm_context.yaml", "--mode", "agent", "--output-dir", str(out_dir)]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    assert (out_dir / "agent_trace.json").exists()
+    assert (out_dir / "agent_report.md").exists()
+
+
+def test_cli_default_mode_is_deterministic(tmp_path: Path):
+    out_dir = tmp_path / "det"
+    cmd = [sys.executable, "-m", "data_dictionary_agent.cli", "--input", "sample_data/crm_contacts/contacts_clean.csv", "--output-dir", str(out_dir)]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    assert result.returncode == 0
+    assert "mode: deterministic" in result.stdout
+
+
+def test_cli_invalid_mode_rejected():
+    parser = __import__("data_dictionary_agent.cli", fromlist=["build_parser"]).build_parser()
+    try:
+        parser.parse_args(["--input", "x.csv", "--mode", "bad"])
+    except SystemExit as exc:
+        assert exc.code != 0
+        return
+    raise AssertionError("Expected argparse to reject invalid mode")

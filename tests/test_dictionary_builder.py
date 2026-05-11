@@ -134,3 +134,24 @@ def test_config_overrides_apply_without_overwriting_observed_facts():
     assert entry["null_count"] == 3 and entry["distinct_count"] == 7
     assert "x" in entry["review_notes"] and "c" in entry["caveats"]
     assert entry["allowed_values"] == ["A"] and entry["business_rules"] == ["rule"]
+
+
+def test_config_semantic_role_override_sets_default_confidence_and_caveat():
+    profile = {"file_name":"d.csv","input_path":"d.csv","file_type":"csv","sheet_name":None,"row_count":1,"column_count":1,"generated_at_utc":"2026-01-01T00:00:00+00:00","columns":[{"column_name":"x","inferred_physical_type":"text","semantic_role":"unknown","semantic_role_confidence":"low","null_count":0,"null_ratio":0,"distinct_count":1,"uniqueness_ratio":1,"sample_values":["a"],"top_values":[],"min_value":"a","max_value":"a","review_required":True,"review_notes":[],"notes":[]}]}
+    config = {"dataset": {}, "columns": {"x": {"semantic_role": "categorical", "description": "X desc"}}}
+    entry = build_data_dictionary(profile, config=config)["columns"][0]
+    assert entry["semantic_role_confidence"] == "medium"
+    assert entry["semantic_role_source"] == "config_override"
+    assert any("Semantic role was provided by config" in c for c in entry["caveats"])
+
+
+def test_review_required_not_cleared_by_description_override():
+    profile = {"file_name":"d.csv","input_path":"d.csv","file_type":"csv","sheet_name":None,"row_count":1,"column_count":1,"generated_at_utc":"2026-01-01T00:00:00+00:00","columns":[{"column_name":"x","inferred_physical_type":"text","semantic_role":"unknown","semantic_role_confidence":"low","null_count":0,"null_ratio":0,"distinct_count":1,"uniqueness_ratio":1,"sample_values":["a"],"top_values":[],"min_value":"a","max_value":"a","review_required":True,"review_notes":[],"notes":[]}]}
+    config = {"dataset": {}, "columns": {"x": {"description": "X desc"}}}
+    assert build_data_dictionary(profile, config=config)["columns"][0]["review_required"] is True
+
+
+def test_explicit_review_required_false_respected():
+    profile = {"file_name":"d.csv","input_path":"d.csv","file_type":"csv","sheet_name":None,"row_count":1,"column_count":1,"generated_at_utc":"2026-01-01T00:00:00+00:00","columns":[{"column_name":"x","inferred_physical_type":"text","semantic_role":"unknown","semantic_role_confidence":"low","null_count":0,"null_ratio":0,"distinct_count":1,"uniqueness_ratio":1,"sample_values":["a"],"top_values":[],"min_value":"a","max_value":"a","review_required":True,"review_notes":[],"notes":[]}]}
+    config = {"dataset": {}, "columns": {"x": {"description": "X desc", "review_required": False}}}
+    assert build_data_dictionary(profile, config=config)["columns"][0]["review_required"] is False

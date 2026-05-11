@@ -100,3 +100,19 @@ def write_dictionary_outputs(dictionary: dict, output_dir: str | Path) -> dict[s
         "data_dictionary_csv": write_dictionary_csv(dictionary, output_dir),
         "data_dictionary_json": write_dictionary_json(dictionary, output_dir),
     }
+
+
+def write_agent_trace(agent_trace: dict, output_dir: str | Path) -> Path:
+    out_dir = Path(output_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    output_path = out_dir / "agent_trace.json"
+    output_path.write_text(json.dumps(agent_trace, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return output_path
+
+
+def write_agent_report(agent_report_text: str, output_dir: str | Path) -> Path:
+    out_dir = Path(output_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    output_path = out_dir / "agent_report.md"
+    output_path.write_text(agent_report_text, encoding="utf-8")
+    return output_path

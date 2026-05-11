@@ -12,7 +12,8 @@ Before formal documentation, teams need grounded evidence about what is actually
 - Semantic inference = deterministic suggestions.
 - Config overrides = user-provided business context.
 - Dictionary outputs = first-pass documentation.
-- Agent mode and LLM generation are not included yet.
+- Agent mode = bounded local orchestration and review over deterministic outputs.
+- LLM generation is not included yet.
 
 ## Quick start
 
@@ -32,6 +33,18 @@ python -m data_dictionary_agent.cli \
   --output-dir outputs/crm_contacts_with_config
 ```
 
+## Agent mode
+
+Use `--mode agent` for bounded deterministic orchestration and review artifacts (`agent_trace.json`, `agent_report.md`). No LLM is used.
+
+```bash
+python -m data_dictionary_agent.cli \
+  --input sample_data/crm_contacts/contacts_clean.csv \
+  --config config/examples/crm_context.yaml \
+  --mode agent \
+  --output-dir outputs/crm_contacts_agent
+```
+
 ## Review workflow
 
 Each run writes `suggested_overrides.yaml`, an editable file containing fields that likely need human confirmation. Typical workflow:
@@ -48,8 +61,12 @@ Each run writes `suggested_overrides.yaml`, an editable file containing fields t
 - `data_dictionary.md` (human-readable dictionary)
 - `suggested_overrides.yaml` (editable review suggestions)
 
+Agent mode also writes:
+- `agent_trace.json`
+- `agent_report.md`
+
 ## Limitations
 
-- No agent mode yet
 - No LLM-generated descriptions yet
 - No formal sensitive-data compliance classification
+- No framework-based orchestration yet
