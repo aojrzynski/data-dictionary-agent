@@ -1,0 +1,12 @@
+dataset:
+  name: crm_contacts
+  display_name: CRM Contacts
+  description: Synthetic CRM contact export used for documentation testing.
+  owner: Example Data Team
+  domain: CRM
+  source_system: Salesforce
+columns:
+  email:
+    display_name: Email Address
+    semantic_role: possible_sensitive
+    review_required: true

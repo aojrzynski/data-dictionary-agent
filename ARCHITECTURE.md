@@ -30,3 +30,5 @@
 ## Trace writing layer
 
 `trace_writer.py` remains focused on `profiling_trace.json`.
+
+- Added optional config override layer and suggested overrides output layer.

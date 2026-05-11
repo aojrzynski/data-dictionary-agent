@@ -40,3 +40,7 @@ data-dictionary-agent --input sample_data/ecommerce_orders/orders.csv --output-d
 - No agent mode yet
 - No LLM-generated descriptions yet
 - No formal sensitive-data compliance classification
+
+## Milestone 4 updates
+- Optional `--config` YAML overrides for dataset/column business context.
+- Always emits `suggested_overrides.yaml` for review workflow.

@@ -1,0 +1,7 @@
+dataset:
+  name: network_assets
+  display_name: Network Assets
+columns:
+  ip_address:
+    semantic_role: possible_sensitive
+    review_required: true

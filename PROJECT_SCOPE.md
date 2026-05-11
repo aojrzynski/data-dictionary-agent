@@ -13,3 +13,6 @@
 - LLM descriptions
 - Formal sensitive data classification
 - Data catalog publishing
+
+- config overrides
+- suggested overrides
