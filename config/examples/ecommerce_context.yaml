@@ -1,0 +1,7 @@
+dataset:
+  name: ecommerce_orders
+  display_name: Ecommerce Orders
+columns:
+  order_id:
+    display_name: Order ID
+    semantic_role: identifier

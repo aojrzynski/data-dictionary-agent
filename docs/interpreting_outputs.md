@@ -11,3 +11,5 @@
 - Semantic roles are suggestions, not confirmed business truth.
 - `possible_sensitive` is a hint, not formal compliance classification.
 - Human review is required before formal publication.
+
+`suggested_overrides.yaml` contains editable dataset/column fields for human confirmation.

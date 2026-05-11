@@ -1,0 +1,25 @@
+dataset:
+  name: network_assets
+  display_name: Network Assets
+  domain: IT Operations
+
+columns:
+  asset_id:
+    description: Unique asset register identifier.
+    semantic_role: identifier
+
+  asset_name:
+    description: Human-readable asset label.
+
+  postcode:
+    description: Site postcode where asset is installed.
+    semantic_role: possible_sensitive
+    review_required: true
+
+  replacement_cost:
+    description: Estimated replacement cost in local currency.
+    semantic_role: numeric_measure
+
+  maintenance_notes:
+    description: Free-form maintenance observations and actions.
+    semantic_role: free_text

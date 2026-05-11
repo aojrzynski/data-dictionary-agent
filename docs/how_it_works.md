@@ -9,3 +9,5 @@
 7. Trace writer emits `profiling_trace.json`.
 
 No LLM calls or agent orchestration occur in this milestone.
+
+Pipeline: intake -> profiling -> semantic inference -> optional config overrides -> dictionary builder -> output writers -> suggested overrides.

@@ -1,0 +1,35 @@
+dataset:
+  name: crm_contacts
+  display_name: CRM Contacts
+  description: Synthetic CRM contact export used for documentation testing.
+  owner: Example Data Team
+  domain: CRM
+  source_system: Salesforce
+
+columns:
+  contact_id:
+    display_name: Contact ID
+    description: Unique identifier for a CRM contact record.
+    semantic_role: identifier
+
+  email:
+    display_name: Email Address
+    description: Contact email address used for communication.
+    semantic_role: possible_sensitive
+    sensitivity_hint: possible_personal_data
+    review_required: true
+    review_notes:
+      - Confirm handling rules before sharing outside the team.
+
+  job_title:
+    display_name: Job Title
+    description: The contact's professional role as captured in CRM.
+    semantic_role: categorical
+
+  status:
+    display_name: Contact Status
+    description: Current lifecycle status for the contact in CRM.
+    allowed_values:
+      - active
+      - inactive
+      - lead

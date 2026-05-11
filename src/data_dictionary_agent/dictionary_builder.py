@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from data_dictionary_agent.config import get_column_overrides, get_dataset_overrides
+
 
 DESCRIPTION_TEMPLATES = {
     "identifier": "Likely identifier field for records or related entities. Confirm exact business meaning and key behaviour.",
@@ -33,13 +35,16 @@ def _description_for(role: str, review_required: bool) -> tuple[str, str]:
     return DESCRIPTION_TEMPLATES.get(role, DESCRIPTION_TEMPLATES["unknown"]), "deterministic_template"
 
 
-def build_data_dictionary(profile: dict[str, Any]) -> dict[str, Any]:
+def build_data_dictionary(profile: dict[str, Any], config: dict[str, Any] | None = None) -> dict[str, Any]:
     entries: list[dict[str, Any]] = []
     for column in profile.get("columns", []):
-        role = column.get("semantic_role", "unknown")
-        review_required = bool(column.get("review_required", False))
+        col_overrides = get_column_overrides(config, str(column.get("column_name", "")))
+        role = col_overrides.get("semantic_role", column.get("semantic_role", "unknown"))
+        review_required = bool(col_overrides.get("review_required", column.get("review_required", False)))
         description, description_source = _description_for(role, review_required)
-        caveats = list(column.get("notes", [])) + list(column.get("review_notes", []))
+        if "description" in col_overrides:
+            description, description_source = col_overrides.get("description", ""), "config_override"
+        caveats = list(column.get("notes", [])) + list(column.get("review_notes", [])) + list(col_overrides.get("caveats", []))
 
         if column.get("semantic_role_confidence") == "low":
             caveats.append("Field requires review because semantic confidence is low.")
@@ -50,14 +55,17 @@ def build_data_dictionary(profile: dict[str, Any]) -> dict[str, Any]:
         if column.get("inferred_physical_type") == "mixed_or_unknown":
             caveats.append("Physical type is mixed_or_unknown.")
 
+        generated_display_name = _to_display_name(str(column.get("column_name", "")))
         entry = {
             "column_name": column.get("column_name"),
-            "display_name": _to_display_name(str(column.get("column_name", ""))),
+            "display_name": col_overrides.get("display_name", generated_display_name),
+            "display_name_source": "config_override" if "display_name" in col_overrides else "generated",
             "description": description,
             "description_source": description_source,
             "physical_type": column.get("inferred_physical_type"),
             "semantic_role": role,
-            "semantic_role_confidence": column.get("semantic_role_confidence"),
+            "semantic_role_source": "config_override" if "semantic_role" in col_overrides else "deterministic_inference",
+            "semantic_role_confidence": col_overrides.get("semantic_role_confidence", column.get("semantic_role_confidence")),
             "nullable": int(column.get("null_count", 0)) > 0,
             "null_count": column.get("null_count", 0),
             "null_ratio": column.get("null_ratio", 0.0),
@@ -68,7 +76,13 @@ def build_data_dictionary(profile: dict[str, Any]) -> dict[str, Any]:
             "min_value": column.get("min_value"),
             "max_value": column.get("max_value"),
             "review_required": review_required,
-            "review_notes": list(column.get("review_notes", [])),
+            "review_notes": list(column.get("review_notes", [])) + list(col_overrides.get("review_notes", [])),
+            "sensitivity_hint": col_overrides.get("sensitivity_hint"),
+            "allowed_values": list(col_overrides.get("allowed_values", [])),
+            "business_rules": list(col_overrides.get("business_rules", [])),
+            "owner": col_overrides.get("owner"),
+            "domain": col_overrides.get("domain"),
+            "source_system": col_overrides.get("source_system"),
             "caveats": list(dict.fromkeys(caveats)),
         }
         entries.append(entry)
@@ -82,6 +96,7 @@ def build_data_dictionary(profile: dict[str, Any]) -> dict[str, Any]:
         "categorical_fields": sum(1 for e in entries if e["semantic_role"] == "categorical"),
     }
 
+    dataset_overrides = get_dataset_overrides(config)
     return {
         "dataset": {
             "source_file": profile.get("file_name"),
@@ -91,6 +106,12 @@ def build_data_dictionary(profile: dict[str, Any]) -> dict[str, Any]:
             "rows": profile.get("row_count", 0),
             "columns": profile.get("column_count", 0),
             "generated_at": profile.get("generated_at_utc"),
+            "name": dataset_overrides.get("name"),
+            "display_name": dataset_overrides.get("display_name"),
+            "description": dataset_overrides.get("description"),
+            "owner": dataset_overrides.get("owner"),
+            "domain": dataset_overrides.get("domain"),
+            "source_system": dataset_overrides.get("source_system"),
         },
         "columns": entries,
         "summary_counts": summary_counts,
