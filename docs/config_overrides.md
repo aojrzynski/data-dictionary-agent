@@ -1,6 +1,6 @@
 # Config Overrides
 
-Use `--config` with YAML to provide user-known business context.
+Use `--config` with YAML to provide known business context.
 
 ## CLI usage
 
@@ -40,6 +40,7 @@ columns:
 
 ## Dataset-level fields
 
+Use these under `dataset`:
 - `name`
 - `display_name`
 - `description`
@@ -49,6 +50,7 @@ columns:
 
 ## Allowed column-level fields
 
+Use these under each entry in `columns`:
 - `display_name`
 - `description`
 - `semantic_role`
@@ -63,22 +65,37 @@ columns:
 - `domain`
 - `source_system`
 
-## What config can override
+## Allowed `semantic_role` values
 
-Config can override business-context metadata in dictionary outputs (display name, description, semantic metadata, review annotations, and business rules).
+- `identifier`
+- `date`
+- `datetime`
+- `numeric_measure`
+- `categorical`
+- `boolean_flag`
+- `free_text`
+- `possible_sensitive`
+- `unknown`
 
-## What config cannot override
+## What overrides can change
 
-Config does **not** overwrite observed profiling evidence, including:
+Overrides can update business-context fields in dictionary outputs, including naming, descriptions, semantic metadata, review annotations, and business rules.
+
+## What overrides cannot change
+
+Overrides do **not** replace observed profiling evidence, including:
 - `row_count`
 - `null_count`
 - `distinct_count`
 - `sample_values`
-- observed physical profiling facts (types and distribution-derived metrics)
+- observed type/distribution facts
 
-## Provenance fields
+## Provenance values in dictionary output
 
-`data_dictionary.json` includes explicit provenance:
-- `description_source` (`deterministic_template`, `blank_review_required`, `config_override`)
-- `display_name_source` (`generated`, `config_override`)
-- `semantic_role_source` (`deterministic_inference`, `config_override`)
+`data_dictionary.json` includes provenance fields showing where values came from:
+
+- `description_source`: `deterministic_template`, `blank_review_required`, `config_override`
+- `display_name_source`: `generated`, `config_override`
+- `semantic_role_source`: `deterministic_inference`, `config_override`
+
+These provenance values help reviewers separate deterministic defaults from explicit human-provided overrides.

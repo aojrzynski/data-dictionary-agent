@@ -1,22 +1,28 @@
 # Interpreting Outputs
 
-- `profiling_trace.json`: deterministic evidence (dataset structure, column profiling, semantic suggestion signals).
-- `data_dictionary.json`: structured first-pass dictionary preserving lists (`sample_values`, `top_values`, `review_notes`, `caveats`).
-- `data_dictionary.csv`: spreadsheet-friendly flattened dictionary for tools like Excel.
-- `data_dictionary.md`: human-readable summary and column documentation for quick review.
+## Core deterministic artifacts
+
+- `profiling_trace.json`: deterministic evidence (dataset structure, column profiling, semantic-signal inputs).
+- `data_dictionary.json`: structured first-pass dictionary preserving list fields (`sample_values`, `top_values`, `review_notes`, `caveats`).
+- `data_dictionary.csv`: flattened, spreadsheet-friendly dictionary output.
+- `data_dictionary.md`: human-readable dictionary summary.
+- `suggested_overrides.yaml`: editable review/config scaffold for business-context updates.
+
+## Agent artifacts (agent mode)
+
+- `agent_trace.json`: structured plan, decisions, evidence references, review items, and run summary.
+- `agent_report.md`: readable summary of what was run and what still needs review.
+
+## Optional LLM suggestion artifacts (`--llm-descriptions`)
+
+- `llm_safe_summary.json`: redacted/capped summary payload used for suggestion generation.
+- `llm_description_suggestions.json`: structured suggestion output.
+- `llm_description_suggestions.md`: readable suggestion summary.
 
 ## Important caveats
 
-- This is a first-pass deterministic dictionary.
-- Semantic roles are suggestions, not confirmed business truth.
-- `possible_sensitive` is a hint, not formal compliance classification.
-- Human review is required before formal publication.
-
-`suggested_overrides.yaml` contains editable dataset/column fields for human confirmation.
-
-
-## Agent outputs
-- `agent_trace.json`: structured plan, decisions, evidence, review items, and run summary.
-- `agent_report.md`: human-readable summary of what the agent did and what needs review.
-
-When `--llm-descriptions` is enabled, outputs also include `llm_safe_summary.json`, `llm_description_suggestions.json`, and `llm_description_suggestions.md`.
+- This is a first-pass dictionary workflow.
+- Semantic roles are deterministic suggestions, not confirmed business truth.
+- `possible_sensitive` is a review hint, not formal compliance classification.
+- LLM description suggestions are optional wording help only.
+- Deterministic profiling evidence remains authoritative for observed data facts.

@@ -1,18 +1,26 @@
-# Agent mode
+# Agent Mode
 
-Agent mode adds bounded local orchestration over deterministic evidence.
+Agent mode adds bounded local orchestration over the same deterministic pipeline.
 
 ## What it does
-- Runs the existing deterministic profiling + dictionary pipeline.
-- Records plan steps, decisions, assumptions, caveats, and review items in `agent_trace.json`.
-- Produces a readable `agent_report.md`.
+
+- Runs the deterministic intake, profiling, semantic inference, config-merge, and dictionary flow.
+- Records run plan steps, decisions, assumptions, caveats, and review items.
+- Produces agent artifacts for traceability and human review.
+
+## What it writes
+
+- `agent_trace.json`
+- `agent_report.md`
 
 ## What it does not do
-- No LLM usage.
-- No autonomous/open-ended reasoning.
-- No orchestration framework.
+
+- No autonomous open-ended behavior.
+- No framework-based orchestration.
+- No replacement of deterministic evidence with generated text.
 
 ## Run
+
 ```bash
 python -m data_dictionary_agent.cli \
   --input sample_data/crm_contacts/contacts_clean.csv \
@@ -21,4 +29,4 @@ python -m data_dictionary_agent.cli \
   --output-dir outputs/crm_contacts_agent
 ```
 
-LLM suggestions can be included in agent mode with `--llm-descriptions`, but remain optional and non-authoritative.
+Optional LLM description suggestions can also be enabled with `--llm-descriptions`. They stay separate and non-authoritative.
