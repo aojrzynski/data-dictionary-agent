@@ -37,13 +37,36 @@ def test_invalid_json_is_explicit_fallback():
             def create(**kwargs): return FakeResp()
 
     _, suggestions = generate_llm_description_suggestions(_dictionary(), client=FakeClient())
+    assert suggestions["llm_call_succeeded"] is True
     assert suggestions["llm_used"] is False
     assert suggestions["source"] == "deterministic_fallback"
-    assert any("not valid JSON" in w for w in suggestions["warnings"])
+    assert any("could not be parsed as valid JSON" in w for w in suggestions["warnings"])
 
 
-def test_valid_response_structure():
+def test_raw_valid_json_is_used():
     payload = {"columns": [{"column_name": "status", "suggested_description": "Status of contact.", "confidence": "medium", "notes": []}]}
     client = type("C", (), {"responses": type("R", (), {"create": staticmethod(lambda **kwargs: type("X", (), {"output_text": json.dumps(payload)})())})})()
     _, suggestions = generate_llm_description_suggestions(_dictionary(), client=client)
+    assert suggestions["source"] == "llm_suggested"
+    assert suggestions["llm_used"] is True
+    assert all(c["review_required"] is True for c in suggestions["columns"])
+
+
+def test_fenced_json_is_used():
+    payload = {"columns": [{"column_name": "status", "suggested_description": "Status of contact.", "confidence": "medium", "notes": []}]}
+    wrapped = f"```json\n{json.dumps(payload)}\n```"
+    client = type("C", (), {"responses": type("R", (), {"create": staticmethod(lambda **kwargs: type("X", (), {"output_text": wrapped})())})})()
+    _, suggestions = generate_llm_description_suggestions(_dictionary(), client=client)
+    assert suggestions["source"] == "llm_suggested"
+    assert suggestions["llm_used"] is True
+    assert all(c["review_required"] is True for c in suggestions["columns"])
+
+
+def test_text_wrapped_json_is_used():
+    payload = {"columns": [{"column_name": "status", "suggested_description": "Status of contact.", "confidence": "medium", "notes": []}]}
+    wrapped = f"Here is the JSON:\n{json.dumps(payload)}\nThanks."
+    client = type("C", (), {"responses": type("R", (), {"create": staticmethod(lambda **kwargs: type("X", (), {"output_text": wrapped})())})})()
+    _, suggestions = generate_llm_description_suggestions(_dictionary(), client=client)
+    assert suggestions["source"] == "llm_suggested"
+    assert suggestions["llm_used"] is True
     assert all(c["review_required"] is True for c in suggestions["columns"])
