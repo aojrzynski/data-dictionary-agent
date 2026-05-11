@@ -54,4 +54,8 @@ def test_cli_with_config_applies_override(tmp_path: Path):
     result = subprocess.run(cmd, capture_output=True, text=True)
     assert result.returncode == 0, result.stderr
     loaded = json.loads((out_dir / "data_dictionary.json").read_text(encoding="utf-8"))
-    assert any(c["display_name"] == "Email Address" for c in loaded["columns"] if c["column_name"] == "email")
+    email = next(c for c in loaded["columns"] if c["column_name"] == "email")
+    assert email["display_name"] == "Email Address"
+    assert email["display_name_source"] == "config_override"
+    assert "description_source" in email
+    assert "semantic_role_source" in email

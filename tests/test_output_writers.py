@@ -49,3 +49,9 @@ def test_output_writers_create_artifacts(tmp_path):
     md = paths["data_dictionary_md"].read_text(encoding="utf-8")
     assert "## Dataset summary" in md
     assert "## Fields needing review" in md
+    assert "Columns needing review" in md
+    assert "Possible sensitive fields" in md
+    assert "Identifier-like fields" in md
+    assert "Date/datetime fields" in md
+    assert "Numeric measures" in md
+    assert "Categorical fields" in md

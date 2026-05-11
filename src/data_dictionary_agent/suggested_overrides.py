@@ -34,6 +34,7 @@ def build_suggested_overrides(dictionary: dict[str, Any]) -> dict[str, Any]:
             "semantic_role": c.get("semantic_role", "unknown"),
             "review_required": True,
             "review_notes": notes,
+            "caveats": list(c.get("caveats", [])),
             "suggested_action": "Add business definition and confirm semantic role.",
         }
         if c.get("semantic_role") == "possible_sensitive":
