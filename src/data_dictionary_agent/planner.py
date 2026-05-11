@@ -1,9 +1,15 @@
-from __future__ import annotations
+"""Plan builder for bounded agent-mode orchestration.
 
+The planner records intended deterministic steps and context notes so runs are
+auditable. It does not execute profiling or inference itself.
+"""
+
+from __future__ import annotations
 from typing import Any
 
 
 def build_agent_plan(input_metadata: dict[str, Any], config: dict[str, Any] | None, cli_options: dict[str, Any]) -> dict[str, Any]:
+    """Create a deterministic run plan with human-readable step purposes."""
     config_provided = bool(cli_options.get("config_path"))
     sheet = cli_options.get("sheet")
     steps = [

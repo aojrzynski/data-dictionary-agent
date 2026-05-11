@@ -1,3 +1,10 @@
+"""Deterministic physical profiling for observed dataset evidence.
+
+This module computes observable column facts (nulls, distinct counts, type-like
+patterns, samples, value ranges). It is the authoritative evidence layer for
+what appears in the file and does not infer business truth on its own.
+"""
+
 from __future__ import annotations
 
 from collections import Counter
@@ -119,6 +126,7 @@ def build_profile(
     sample_size: int = 5,
     top_values_limit: int = 5,
 ) -> dict:
+    """Build deterministic profile evidence for every dataset column."""
     column_profiles = []
 
     for column in df.columns:
@@ -153,23 +161,25 @@ def build_profile(
             notes.append("Column contains multiple value patterns.")
 
         column_profile = {
-                "column_name": str(column),
-                "normalised_column_name": _normalise_column_name(str(column)),
-                "pandas_dtype": str(raw_series.dtype),
-                "inferred_physical_type": inferred,
-                "non_null_count": non_null_count,
-                "null_count": null_count,
-                "null_ratio": round(null_count / row_count, 6) if row_count else 0.0,
-                "distinct_count": distinct_count,
-                "uniqueness_ratio": round(distinct_count / non_null_count, 6)
-                if non_null_count
-                else 0.0,
-                "sample_values": sample_values,
-                "top_values": top_values,
-                "min_value": None if min_value is None else str(min_value),
-                "max_value": None if max_value is None else str(max_value),
-                "notes": notes,
-            }
+            "column_name": str(column),
+            "normalised_column_name": _normalise_column_name(str(column)),
+            "pandas_dtype": str(raw_series.dtype),
+            "inferred_physical_type": inferred,
+            "non_null_count": non_null_count,
+            "null_count": null_count,
+            "null_ratio": round(null_count / row_count, 6) if row_count else 0.0,
+            "distinct_count": distinct_count,
+            "uniqueness_ratio": round(distinct_count / non_null_count, 6)
+            if non_null_count
+            else 0.0,
+            "sample_values": sample_values,
+            "top_values": top_values,
+            "min_value": None if min_value is None else str(min_value),
+            "max_value": None if max_value is None else str(max_value),
+            "notes": notes,
+        }
+        # Semantic inference is additive suggestion metadata on top of observed
+        # physical evidence; it does not replace the evidence fields above.
         column_profile.update(infer_semantic_metadata(column_profile))
         column_profiles.append(column_profile)
 

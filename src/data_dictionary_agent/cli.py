@@ -1,3 +1,9 @@
+"""CLI entrypoint for deterministic and bounded agent execution modes.
+
+The CLI coordinates argument parsing and output printing. Business logic stays
+in dedicated pipeline modules.
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -8,13 +14,20 @@ from data_dictionary_agent.config import load_config
 from data_dictionary_agent.dictionary_builder import build_data_dictionary
 from data_dictionary_agent.intake import load_dataset
 from data_dictionary_agent.llm_descriptions import generate_llm_description_suggestions
-from data_dictionary_agent.output_writers import write_dictionary_outputs, write_suggested_overrides_yaml, write_llm_safe_summary, write_llm_description_suggestions_json, write_llm_description_suggestions_markdown
+from data_dictionary_agent.output_writers import (
+    write_dictionary_outputs,
+    write_llm_description_suggestions_json,
+    write_llm_description_suggestions_markdown,
+    write_llm_safe_summary,
+    write_suggested_overrides_yaml,
+)
 from data_dictionary_agent.profiling import build_profile
 from data_dictionary_agent.suggested_overrides import build_suggested_overrides
 from data_dictionary_agent.trace_writer import write_profiling_trace
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Build CLI parser for deterministic and agent pipeline modes."""
     parser = argparse.ArgumentParser(description="Deterministic dataset profiling tool")
     parser.add_argument("--input", required=True, help="Path to CSV/XLSX/XLSM input file")
     parser.add_argument("--sheet", help="Sheet name for Excel files", default=None)
@@ -27,22 +40,36 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--llm-model", default=None)
     return parser
 
+def _print_output_paths(output_paths: dict[str, str]) -> None:
+    """Print output artifact paths in stable key order."""
+    for key in output_paths:
+        print(f"{key}: {output_paths[key]}")
+
 
 def main() -> int:
+    """Execute CLI flow and return process-style exit code."""
     parser = build_parser()
     args = parser.parse_args()
 
     try:
         if args.mode == "agent":
-            result = run_agent(args.input, args.output_dir, sheet=args.sheet, config_path=args.config, sample_size=args.sample_size, top_values_limit=args.top_values_limit, llm_descriptions=args.llm_descriptions, llm_model=args.llm_model)
+            result = run_agent(
+                args.input,
+                args.output_dir,
+                sheet=args.sheet,
+                config_path=args.config,
+                sample_size=args.sample_size,
+                top_values_limit=args.top_values_limit,
+                llm_descriptions=args.llm_descriptions,
+                llm_model=args.llm_model,
+            )
             profile = result["profile"]
             output_paths = result["output_paths"]
             print("profiling completed")
             print(f"rows: {profile['row_count']}")
             print(f"columns: {profile['column_count']}")
             print("mode: agent")
-            for key in output_paths:
-                print(f"{key}: {output_paths[key]}")
+            _print_output_paths(output_paths)
             return 0
 
         df, metadata = load_dataset(args.input, sheet=args.sheet)

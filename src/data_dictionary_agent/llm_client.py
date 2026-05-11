@@ -1,9 +1,16 @@
+"""Thin wrapper for optional LLM calls used in description suggestion mode.
+
+If credentials/client support are unavailable, deterministic fallback behavior
+is surfaced to callers via warnings and status flags.
+"""
+
 from __future__ import annotations
 
 import os
 
 
 def request_llm_suggestions(prompt: str, model: str | None = None, client: object | None = None) -> tuple[str | None, list[str], bool, str]:
+    """Request suggestion JSON text from an LLM, with safe fallback metadata."""
     warnings: list[str] = []
     chosen_model = model or os.getenv("OPENAI_MODEL") or "gpt-4o-mini"
     if client is None:

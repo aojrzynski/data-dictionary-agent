@@ -1,3 +1,9 @@
+"""Config loading and validation for optional dictionary overrides.
+
+This module accepts user-provided context (display names, descriptions, roles)
+and validates its structure. It does not mutate profiling evidence itself.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -39,6 +45,7 @@ def _empty_config() -> dict[str, Any]:
 
 
 def load_config(path: str | Path | None) -> dict[str, Any]:
+    """Load and validate optional YAML overrides for dataset and columns."""
     if not path:
         return _empty_config()
     config_path = Path(path)
