@@ -9,6 +9,19 @@ from __future__ import annotations
 import os
 
 
+def _is_unsupported_response_format_error(exc: Exception) -> bool:
+    if isinstance(exc, TypeError):
+        return True
+    msg = str(exc).lower()
+    needles = (
+        "unexpected keyword",
+        "unknown parameter",
+        "unsupported parameter",
+        "response_format",
+    )
+    return any(n in msg for n in needles)
+
+
 def request_llm_suggestions(prompt: str, model: str | None = None, client: object | None = None) -> tuple[str | None, list[str], bool, str]:
     """Request suggestion JSON text from an LLM, with safe fallback metadata."""
     warnings: list[str] = []
@@ -25,14 +38,26 @@ def request_llm_suggestions(prompt: str, model: str | None = None, client: objec
             return None, warnings, False, chosen_model
         client = OpenAI(api_key=api_key)
 
+    base_kwargs = {
+        "model": chosen_model,
+        "input": prompt,
+        "temperature": 0,
+    }
+
     try:
-        response = client.responses.create(
-            model=chosen_model,
-            input=prompt,
-            temperature=0,
-            response_format={"type": "json_object"},
-        )
+        response = client.responses.create(**base_kwargs, response_format={"type": "json_object"})
         return response.output_text, warnings, True, chosen_model
     except Exception as exc:
-        warnings.append(f"LLM request failed; deterministic fallback suggestions were generated. Error: {exc}")
-        return None, warnings, False, chosen_model
+        if not _is_unsupported_response_format_error(exc):
+            warnings.append(f"LLM request failed; deterministic fallback suggestions were generated. Error: {exc}")
+            return None, warnings, False, chosen_model
+
+        warnings.append(
+            "Structured JSON response request was not supported; retried without it and will validate the returned text."
+        )
+        try:
+            response = client.responses.create(**base_kwargs)
+            return response.output_text, warnings, True, chosen_model
+        except Exception as retry_exc:
+            warnings.append(f"LLM request failed; deterministic fallback suggestions were generated. Error: {retry_exc}")
+            return None, warnings, False, chosen_model
