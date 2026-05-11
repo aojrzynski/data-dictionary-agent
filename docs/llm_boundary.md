@@ -1,9 +1,19 @@
-# LLM boundary
+# LLM Boundary
 
-- Possible sensitive fields are redacted before LLM use.
-- Non-sensitive fields may include a small capped set of sample/top values.
-- Raw full rows are not sent.
-- Large payloads are avoided by capping/truncation.
-- The exact safe summary sent to the LLM path is written to `llm_safe_summary.json` for inspection.
-- If LLM is unavailable or output is invalid, deterministic fallback suggestions are generated.
-- LLM suggestions are optional wording help and are not authoritative.
+Optional LLM description suggestions are a wording layer, not a truth layer.
+
+## Rules in this project
+
+- LLM suggestions are optional and off by default.
+- Suggestions are written to separate files and do not overwrite `data_dictionary.md/.csv/.json`.
+- Possible sensitive fields are redacted in `llm_safe_summary.json`.
+- No full raw rows are sent to the LLM.
+- Non-sensitive sample/top values are capped and truncated.
+- If no API key is available, fallback suggestions are generated.
+- If LLM output is invalid, fallback suggestions are generated.
+
+## Review expectations
+
+- Treat LLM text as draft wording only.
+- Keep deterministic profiling evidence as authoritative for observed data facts.
+- Confirm business definitions with human owners before publication.

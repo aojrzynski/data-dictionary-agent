@@ -1,25 +1,66 @@
 # Example Commands
 
-```bash
-python -m data_dictionary_agent.cli --input sample_data/crm_contacts/contacts_clean.csv --output-dir outputs/crm_contacts_profile
-```
+## Deterministic run
 
 ```bash
-data-dictionary-agent --input sample_data/ecommerce_orders/orders.csv --output-dir outputs/orders_profile
+python -m data_dictionary_agent.cli \
+  --input sample_data/crm_contacts/contacts_clean.csv \
+  --output-dir outputs/crm_contacts_profile
 ```
 
-Expected output files in each output directory:
+## Deterministic run with config overrides
+
+```bash
+python -m data_dictionary_agent.cli \
+  --input sample_data/crm_contacts/contacts_clean.csv \
+  --config config/examples/crm_context.yaml \
+  --output-dir outputs/crm_contacts_with_config
+```
+
+## Agent mode run
+
+```bash
+python -m data_dictionary_agent.cli \
+  --input sample_data/crm_contacts/contacts_clean.csv \
+  --config config/examples/crm_context.yaml \
+  --mode agent \
+  --output-dir outputs/crm_contacts_agent
+```
+
+## Deterministic run with optional LLM suggestions
+
+```bash
+python -m data_dictionary_agent.cli \
+  --input sample_data/crm_contacts/contacts_clean.csv \
+  --llm-descriptions \
+  --output-dir outputs/crm_contacts_llm
+```
+
+## Agent mode run with optional LLM suggestions
+
+```bash
+python -m data_dictionary_agent.cli \
+  --input sample_data/crm_contacts/contacts_clean.csv \
+  --config config/examples/crm_context.yaml \
+  --mode agent \
+  --llm-descriptions \
+  --output-dir outputs/crm_contacts_agent_llm
+```
+
+## Expected outputs
+
+Deterministic outputs always include:
 - `profiling_trace.json`
 - `data_dictionary.md`
 - `data_dictionary.csv`
 - `data_dictionary.json`
+- `suggested_overrides.yaml`
 
-- With config: `python -m data_dictionary_agent.cli --input sample_data/crm_contacts/contacts_clean.csv --config config/examples/crm_context.yaml --output-dir outputs/crm_contacts_with_config`
+Agent mode also adds:
+- `agent_trace.json`
+- `agent_report.md`
 
-
-## Agent mode
-`python -m data_dictionary_agent.cli --input sample_data/crm_contacts/contacts_clean.csv --config config/examples/crm_context.yaml --mode agent --output-dir outputs/crm_contacts_agent`
-
-- `python -m data_dictionary_agent.cli --input sample_data/crm_contacts/contacts_clean.csv --llm-descriptions --output-dir outputs/crm_contacts_llm`
-- `python -m data_dictionary_agent.cli --input sample_data/crm_contacts/contacts_clean.csv --config config/examples/crm_context.yaml --mode agent --llm-descriptions --output-dir outputs/crm_contacts_agent_llm`
-
+`--llm-descriptions` also adds:
+- `llm_safe_summary.json`
+- `llm_description_suggestions.json`
+- `llm_description_suggestions.md`

@@ -1,6 +1,6 @@
 # Config Overrides
 
-Use `--config` with YAML to provide user-known business context.
+Use `--config` with YAML to provide known business context.
 
 ## CLI usage
 
@@ -38,47 +38,24 @@ columns:
       - Confirm handling rules before sharing.
 ```
 
-## Dataset-level fields
+## What overrides can change
 
-- `name`
-- `display_name`
-- `description`
-- `owner`
-- `domain`
-- `source_system`
+Overrides can update business-context fields in dictionary outputs, including naming, descriptions, semantic metadata, review annotations, and business rules.
 
-## Allowed column-level fields
+## What overrides cannot change
 
-- `display_name`
-- `description`
-- `semantic_role`
-- `semantic_role_confidence`
-- `sensitivity_hint`
-- `review_required`
-- `review_notes`
-- `caveats`
-- `allowed_values`
-- `business_rules`
-- `owner`
-- `domain`
-- `source_system`
-
-## What config can override
-
-Config can override business-context metadata in dictionary outputs (display name, description, semantic metadata, review annotations, and business rules).
-
-## What config cannot override
-
-Config does **not** overwrite observed profiling evidence, including:
+Overrides do **not** replace observed profiling evidence, including:
 - `row_count`
 - `null_count`
 - `distinct_count`
 - `sample_values`
-- observed physical profiling facts (types and distribution-derived metrics)
+- observed type/distribution facts
 
-## Provenance fields
+## Provenance in dictionary output
 
-`data_dictionary.json` includes explicit provenance:
-- `description_source` (`deterministic_template`, `blank_review_required`, `config_override`)
-- `display_name_source` (`generated`, `config_override`)
-- `semantic_role_source` (`deterministic_inference`, `config_override`)
+`data_dictionary.json` includes provenance fields such as:
+- `description_source`
+- `display_name_source`
+- `semantic_role_source`
+
+These fields show whether a value came from deterministic logic or a config override.

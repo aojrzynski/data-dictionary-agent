@@ -8,9 +8,8 @@
 4. Semantic inference adds deterministic semantic role suggestions.
 5. Optional config overrides inject user-provided business context.
 6. Dictionary builder creates first-pass dictionary entries.
-7. Output writers emit `data_dictionary.md`, `data_dictionary.csv`, and `data_dictionary.json`.
+7. Output writers emit dictionary artifacts and suggested review overrides.
 8. Trace writer emits `profiling_trace.json`.
-9. Suggested overrides writer emits `suggested_overrides.yaml`.
 
 Pipeline:
 `intake -> profiling -> semantic inference -> config overrides -> dictionary -> outputs -> suggested overrides`
@@ -18,12 +17,20 @@ Pipeline:
 ## Agent mode
 
 1. Planner builds a bounded run plan.
-2. Deterministic pipeline executes using the same intake/profiling/inference/builders.
-3. Agent runner reviews outputs and records decisions/review items.
+2. The deterministic pipeline executes using the same intake/profiling/inference/builders.
+3. Agent runner records decisions, assumptions, and review items.
 4. Agent artifacts are written: `agent_trace.json` and `agent_report.md`.
 
 Pipeline:
-`planner -> deterministic pipeline -> output review -> decisions/review items -> agent_trace.json -> agent_report.md`
+`planner -> deterministic pipeline -> review/decision capture -> agent_trace.json -> agent_report.md`
 
-No LLM calls occur.
 Agent mode is bounded local orchestration over deterministic tools.
+
+## Optional LLM description suggestions
+
+When `--llm-descriptions` is enabled:
+
+1. A redacted/capped safe summary is created in `llm_safe_summary.json`.
+2. The tool requests optional wording suggestions from the LLM.
+3. If no API key is present or output is invalid, fallback suggestions are generated.
+4. Suggestions are written to separate files and do not overwrite dictionary outputs.

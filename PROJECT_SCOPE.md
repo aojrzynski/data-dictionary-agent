@@ -1,5 +1,7 @@
 # Project Scope
 
+This file explains what the current v1 does and what it deliberately does not try to do.
+
 ## Included now
 
 - Physical profiling
@@ -21,3 +23,6 @@
 - Data catalog publishing
 - Framework-based orchestration
 - Automatic replacement of governed business definitions
+- Web UI
+- Database-backed metadata repository
+- Autonomous open-ended agent behaviour
