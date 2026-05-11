@@ -17,3 +17,9 @@
 - Formal sensitive data classification
 - Data catalog publishing
 - Framework-based orchestration
+
+- Optional LLM description suggestions
+- llm_safe_summary.json
+- llm_description_suggestions.json
+- llm_description_suggestions.md
+

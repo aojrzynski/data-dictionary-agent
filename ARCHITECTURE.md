@@ -53,3 +53,8 @@
 ## Agent reporting layer
 
 `agent_reporting.py` turns the agent trace into a readable Markdown report.
+
+## Milestone 6 additions
+- LLM safety/summary layer
+- LLM description suggestion layer
+

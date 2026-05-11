@@ -18,3 +18,5 @@
 ## Agent outputs
 - `agent_trace.json`: structured plan, decisions, evidence, review items, and run summary.
 - `agent_report.md`: human-readable summary of what the agent did and what needs review.
+
+When `--llm-descriptions` is enabled, outputs also include `llm_safe_summary.json`, `llm_description_suggestions.json`, and `llm_description_suggestions.md`.

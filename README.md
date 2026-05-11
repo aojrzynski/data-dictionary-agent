@@ -70,3 +70,7 @@ Agent mode also writes:
 - No LLM-generated descriptions yet
 - No formal sensitive-data compliance classification
 - No framework-based orchestration yet
+
+## Milestone 6 update
+Optional LLM description suggestions are available with `--llm-descriptions`. They are non-authoritative wording suggestions and require human review.
+

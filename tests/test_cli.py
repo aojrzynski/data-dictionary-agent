@@ -86,3 +86,21 @@ def test_cli_invalid_mode_rejected():
         assert exc.code != 0
         return
     raise AssertionError("Expected argparse to reject invalid mode")
+
+def test_cli_llm_descriptions_writes_files_without_api_key(tmp_path, monkeypatch):
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    out_dir = tmp_path / "llm"
+    cmd = [sys.executable, "-m", "data_dictionary_agent.cli", "--input", "sample_data/crm_contacts/contacts_clean.csv", "--llm-descriptions", "--output-dir", str(out_dir)]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    assert (out_dir / "llm_safe_summary.json").exists()
+    assert (out_dir / "llm_description_suggestions.json").exists()
+    assert (out_dir / "llm_description_suggestions.md").exists()
+
+
+def test_cli_default_run_has_no_llm_files(tmp_path):
+    out_dir = tmp_path / "no_llm"
+    cmd = [sys.executable, "-m", "data_dictionary_agent.cli", "--input", "sample_data/crm_contacts/contacts_clean.csv", "--output-dir", str(out_dir)]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    assert result.returncode == 0
+    assert not (out_dir / "llm_safe_summary.json").exists()
