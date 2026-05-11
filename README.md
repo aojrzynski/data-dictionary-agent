@@ -53,11 +53,25 @@ It means several bounded layers work together:
 ## Quick start
 
 ```bash
-pip install -e ".[dev]"
+python -m venv .venv
+source .venv/Scripts/activate
+python -m pip install -e ".[dev]"
 python -m data_dictionary_agent.cli \
   --input sample_data/crm_contacts/contacts_clean.csv \
   --output-dir outputs/crm_contacts_profile
 ```
+
+macOS/Linux activation uses `source .venv/bin/activate`.
+
+### Optional: enable real LLM suggestions
+
+```bash
+python -m pip install -e ".[dev,llm]"
+export OPENAI_API_KEY="your-key"
+export OPENAI_MODEL="gpt-4o-mini"  # optional
+```
+
+`--llm-descriptions` still works without an API key. In that case deterministic fallback suggestions are generated. LLM suggestion files stay separate and do not overwrite dictionary outputs.
 
 ## Example commands
 
@@ -143,11 +157,19 @@ python -m data_dictionary_agent.cli \
 
 ## Project structure
 
-- `src/data_dictionary_agent/` — CLI and pipeline layers
-- `docs/` — usage and boundary docs
-- `config/examples/` — sample config overrides
-- `sample_data/` — sample datasets
-- `tests/` — test suite
+- `src/data_dictionary_agent/cli.py` — command-line entrypoint and run orchestration.
+- `src/data_dictionary_agent/intake.py` — CSV/XLSX/XLSM loading and input validation.
+- `src/data_dictionary_agent/profiling.py` — deterministic physical profiling logic.
+- `src/data_dictionary_agent/semantic_inference.py` — deterministic semantic role suggestion rules.
+- `src/data_dictionary_agent/config.py` — YAML config override loading/validation.
+- `src/data_dictionary_agent/dictionary_builder.py` — first-pass dictionary entry construction.
+- `src/data_dictionary_agent/suggested_overrides.py` — suggested review override artifact generation.
+- `src/data_dictionary_agent/agent_runner.py` — bounded agent-mode execution and trace capture.
+- `src/data_dictionary_agent/agent_reporting.py` — human-readable agent run reporting.
+- `src/data_dictionary_agent/llm_descriptions.py` — safe summary creation and optional LLM/fallback suggestions.
+- `src/data_dictionary_agent/output_writers.py` — writes dictionary and related output artifacts.
+- `tests/` — automated test coverage for pipeline behavior.
+- `docs/` — usage guides, boundaries, and release notes for maintainers.
 
 ## Run tests
 
@@ -171,3 +193,8 @@ python -m pytest
 - `docs/interpreting_outputs.md`
 - `docs/hybrid_agent.md`
 - `docs/llm_boundary.md`
+- `docs/example_commands.md`
+- `docs/config_overrides.md`
+- `docs/agent_mode.md`
+- `docs/release_checklist.md`
+- `FUTURE_WORK.md`

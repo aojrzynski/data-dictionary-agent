@@ -38,6 +38,45 @@ columns:
       - Confirm handling rules before sharing.
 ```
 
+## Dataset-level fields
+
+Use these under `dataset`:
+- `name`
+- `display_name`
+- `description`
+- `owner`
+- `domain`
+- `source_system`
+
+## Allowed column-level fields
+
+Use these under each entry in `columns`:
+- `display_name`
+- `description`
+- `semantic_role`
+- `semantic_role_confidence`
+- `sensitivity_hint`
+- `review_required`
+- `review_notes`
+- `caveats`
+- `allowed_values`
+- `business_rules`
+- `owner`
+- `domain`
+- `source_system`
+
+## Allowed `semantic_role` values
+
+- `identifier`
+- `date`
+- `datetime`
+- `numeric_measure`
+- `categorical`
+- `boolean_flag`
+- `free_text`
+- `possible_sensitive`
+- `unknown`
+
 ## What overrides can change
 
 Overrides can update business-context fields in dictionary outputs, including naming, descriptions, semantic metadata, review annotations, and business rules.
@@ -51,11 +90,12 @@ Overrides do **not** replace observed profiling evidence, including:
 - `sample_values`
 - observed type/distribution facts
 
-## Provenance in dictionary output
+## Provenance values in dictionary output
 
-`data_dictionary.json` includes provenance fields such as:
-- `description_source`
-- `display_name_source`
-- `semantic_role_source`
+`data_dictionary.json` includes provenance fields showing where values came from:
 
-These fields show whether a value came from deterministic logic or a config override.
+- `description_source`: `deterministic_template`, `blank_review_required`, `config_override`
+- `display_name_source`: `generated`, `config_override`
+- `semantic_role_source`: `deterministic_inference`, `config_override`
+
+These provenance values help reviewers separate deterministic defaults from explicit human-provided overrides.
