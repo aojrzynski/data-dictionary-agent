@@ -1,5 +1,10 @@
 from __future__ import annotations
 
+"""Optional LLM wording suggestions built from safe deterministic summaries.
+
+This module prepares redacted/capped metadata for LLM prompting and validates
+responses. It never overwrites deterministic dictionary outputs.
+"""
 import json
 from datetime import datetime, timezone
 
@@ -12,6 +17,7 @@ def _truncate(v: object, limit: int = 80) -> object:
 
 
 def build_llm_safe_summary(dictionary: dict, sample_limit: int = 3) -> dict:
+    """Build a redacted summary payload safe for optional wording suggestions."""
     cols = []
     for c in dictionary.get("columns", []):
         sensitive = c.get("semantic_role") == "possible_sensitive" or bool(c.get("sensitivity_hint"))
@@ -22,6 +28,7 @@ def build_llm_safe_summary(dictionary: dict, sample_limit: int = 3) -> dict:
             "description_source": c.get("description_source"), "review_required": c.get("review_required"), "review_notes": c.get("review_notes", []),
             "caveats": c.get("caveats", []), "allowed_values": c.get("allowed_values", []),
         }
+        # Redact likely sensitive values before any optional LLM usage.
         if sensitive:
             safe["sample_values"] = ["[REDACTED_POSSIBLE_SENSITIVE]"]
             safe["top_values"] = []
@@ -52,6 +59,7 @@ def build_deterministic_fallback_suggestions(dictionary: dict, reason: str) -> d
 
 
 def generate_llm_description_suggestions(dictionary: dict, model: str | None = None, client: object | None = None) -> tuple[dict, dict]:
+    """Return (safe_summary, suggestions), using deterministic fallback on failure."""
     summary = build_llm_safe_summary(dictionary)
     prompt = _build_prompt(summary)
     text, warnings, llm_used, chosen_model = request_llm_suggestions(prompt, model=model, client=client)
@@ -59,6 +67,7 @@ def generate_llm_description_suggestions(dictionary: dict, model: str | None = N
     parsed = fallback
     source = "deterministic_fallback"
     llm_call_succeeded = llm_used
+    # Validate response shape strictly; fallback keeps outputs predictable.
     if llm_used and text:
         try:
             candidate = json.loads(text)

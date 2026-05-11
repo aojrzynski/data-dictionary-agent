@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+"""Writer for deterministic profiling trace evidence."""
 import json
 from pathlib import Path
 
 
 def write_profiling_trace(profile: dict, output_dir: str | Path) -> Path:
+    """Persist profiling evidence to profiling_trace.json."""
     out_dir = Path(output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 

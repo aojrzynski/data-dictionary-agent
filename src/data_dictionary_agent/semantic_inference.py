@@ -1,5 +1,11 @@
 from __future__ import annotations
 
+"""Deterministic semantic suggestion rules for profiled columns.
+
+This module maps observed profile facts and column-name hints to likely
+semantic roles. These are suggestions, not confirmed business definitions.
+"""
+
 import re
 from typing import Any
 
@@ -71,6 +77,7 @@ def _is_possible_sensitive_name(name: str, tokens: list[str]) -> bool:
 
 
 def infer_semantic_metadata(column_profile: dict[str, Any]) -> dict[str, Any]:
+    """Infer semantic hints from one column profile using deterministic rules."""
     name = str(column_profile.get("normalised_column_name") or column_profile.get("column_name", "")).lower()
     tokens = _tokenise_column_name(name)
     inferred_physical_type = column_profile.get("inferred_physical_type", "unknown")

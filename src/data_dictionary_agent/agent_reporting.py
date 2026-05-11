@@ -1,7 +1,12 @@
 from __future__ import annotations
 
+"""Markdown report builder for agent-mode run summaries.
+
+Reports restate the recorded trace in a reader-friendly format.
+"""
 
 def build_agent_report(agent_trace: dict) -> str:
+    """Render an agent trace into a markdown report."""
     summary = agent_trace.get("summary", {})
     input_info = agent_trace.get("input", {})
     lines = [

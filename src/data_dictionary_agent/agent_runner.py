@@ -1,5 +1,11 @@
 from __future__ import annotations
 
+"""Bounded agent-mode orchestration over deterministic pipeline components.
+
+Agent mode coordinates existing deterministic modules, records decisions and
+review items, and writes trace/report artifacts. It is not open-ended autonomy.
+"""
+
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -25,12 +31,26 @@ from data_dictionary_agent.suggested_overrides import build_suggested_overrides
 from data_dictionary_agent.trace_writer import write_profiling_trace
 
 
-def run_agent(input_path: str, output_dir: str, sheet: str | None = None, config_path: str | None = None, sample_size: int = 5, top_values_limit: int = 5, llm_descriptions: bool = False, llm_model: str | None = None) -> dict:
+def run_agent(
+    input_path: str,
+    output_dir: str,
+    sheet: str | None = None,
+    config_path: str | None = None,
+    sample_size: int = 5,
+    top_values_limit: int = 5,
+    llm_descriptions: bool = False,
+    llm_model: str | None = None,
+) -> dict:
+    """Run bounded orchestration and return deterministic + agent artifacts."""
+    # Section: load/config/plan
     config = load_config(config_path)
     plan = build_agent_plan({"input_path": input_path}, config, {"sheet": sheet, "config_path": config_path})
 
+    # Section: deterministic pipeline
     df, metadata = load_dataset(input_path, sheet=sheet)
     profile = build_profile(df, metadata, sample_size=sample_size, top_values_limit=top_values_limit)
+    # Trace is written first so evidence is persisted before downstream assistive
+    # layers (dictionary formatting, suggested overrides, optional LLM wording).
     profiling_trace_path = write_profiling_trace(profile, output_dir)
     dictionary = build_data_dictionary(profile, config=config)
     dictionary_paths = write_dictionary_outputs(dictionary, output_dir)
@@ -40,19 +60,26 @@ def run_agent(input_path: str, output_dir: str, sheet: str | None = None, config
     for step in plan["steps"]:
         step["status"] = "completed"
 
+    # Section: review item construction
     review_items = []
     for c in dictionary.get("columns", []):
         caveats = [cv for cv in c.get("caveats", []) if cv != CONFIG_PROVENANCE_CAVEAT]
         identifier_not_unique = c.get("semantic_role") == "identifier" and (c.get("uniqueness_ratio") or 0) < 1
-        needs = c.get("review_required") or c.get("semantic_role") in {"unknown", "possible_sensitive"} or c.get("semantic_role_confidence") == "low" or c.get("physical_type") == "mixed_or_unknown" or identifier_not_unique or bool(caveats)
+        needs = (
+            c.get("review_required")
+            or c.get("semantic_role") in {"unknown", "possible_sensitive"}
+            or c.get("semantic_role_confidence") == "low"
+            or c.get("physical_type") == "mixed_or_unknown"
+            or identifier_not_unique
+            or bool(caveats)
+        )
         if needs:
             review_items.append({
                 "column_name": c.get("column_name"),
                 "reason": "; ".join(c.get("review_notes") or caveats or ["Review required by deterministic rules."]),
                 "suggested_action": "Confirm semantic role, description, and handling requirements.",
             })
-
-
+    # Section: optional LLM suggestion handling
     llm_used = False
     llm_source = "deterministic_fallback"
     llm_paths = {}
@@ -63,9 +90,16 @@ def run_agent(input_path: str, output_dir: str, sheet: str | None = None, config
         llm_paths = {
             "llm_safe_summary": str(write_llm_safe_summary(safe_summary, output_dir)),
             "llm_description_suggestions_json": str(write_llm_description_suggestions_json(suggestions, output_dir)),
-            "llm_description_suggestions_md": str(write_llm_description_suggestions_markdown(suggestions, Path(input_path).name, output_dir)),
+            "llm_description_suggestions_md": str(
+                write_llm_description_suggestions_markdown(
+                    suggestions,
+                    Path(input_path).name,
+                    output_dir,
+                )
+            ),
         }
 
+    # Section: agent trace/report construction
     agent_trace_path = Path(output_dir) / "agent_trace.json"
     agent_report_path = Path(output_dir) / "agent_report.md"
     output_files = {
@@ -89,7 +123,10 @@ def run_agent(input_path: str, output_dir: str, sheet: str | None = None, config
             {"decision_id": "d3", "decision": "LLM behavior", "rationale": "LLM description suggestions were requested." if llm_descriptions else "LLM description suggestions were not requested.", "evidence": [f"llm_used={llm_used}", f"source={llm_source}"]},
         ],
         "assumptions": [
-            {"assumption": "Deterministic profiling trace is authoritative evidence.", "reason": "Project boundary for milestone 5."}
+            {
+                "assumption": "Deterministic profiling trace is authoritative evidence for observed data facts.",
+                "reason": "Profiling records what is observed in source data before assistive layers.",
+            }
         ],
         "caveats": [
             {"caveat": "First-pass dictionary only.", "severity": "medium"},

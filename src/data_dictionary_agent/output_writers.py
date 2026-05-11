@@ -1,5 +1,10 @@
 from __future__ import annotations
 
+"""Writers for deterministic, agent, and optional LLM output artifacts.
+
+This module serializes prepared structures to stable filenames/formats. It does
+not build profiling evidence or inference decisions.
+"""
 import csv
 import json
 from pathlib import Path
@@ -12,6 +17,7 @@ def _escape_md(value: object) -> str:
 
 
 def write_dictionary_json(dictionary: dict, output_dir: str | Path) -> Path:
+    """Write JSON dictionary artifact."""
     out_dir = Path(output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     output_path = out_dir / "data_dictionary.json"
@@ -20,6 +26,7 @@ def write_dictionary_json(dictionary: dict, output_dir: str | Path) -> Path:
 
 
 def write_suggested_overrides_yaml(suggested_overrides: dict, output_dir: str | Path) -> Path:
+    """Write YAML template for human review overrides."""
     out_dir = Path(output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     output_path = out_dir / "suggested_overrides.yaml"

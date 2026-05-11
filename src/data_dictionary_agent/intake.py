@@ -1,5 +1,11 @@
 from __future__ import annotations
 
+"""Dataset intake utilities for local CSV/XLSX/XLSM files.
+
+This module validates file paths and loads tabular data into pandas plus basic
+source metadata. It does not profile values, infer semantics, or apply config.
+"""
+
 from pathlib import Path
 
 import pandas as pd
@@ -8,6 +14,7 @@ SUPPORTED_EXTENSIONS = {".csv", ".xlsx", ".xlsm"}
 
 
 def load_dataset(input_path: str | Path, sheet: str | None = None) -> tuple[pd.DataFrame, dict]:
+    """Load a supported tabular file and return (dataframe, source metadata)."""
     path = Path(input_path)
 
     if not path.exists():

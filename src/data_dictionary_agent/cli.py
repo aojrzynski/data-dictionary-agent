@@ -1,5 +1,10 @@
 from __future__ import annotations
 
+"""CLI entrypoint for deterministic and bounded agent execution modes.
+
+The CLI coordinates argument parsing and output printing. Business logic stays
+in dedicated pipeline modules.
+"""
 import argparse
 import sys
 
@@ -27,6 +32,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--llm-model", default=None)
     return parser
 
+def _print_output_paths(output_paths: dict[str, str]) -> None:
+    """Print output artifact paths in stable key order."""
+    for key in output_paths:
+        print(f"{key}: {output_paths[key]}")
+
 
 def main() -> int:
     parser = build_parser()
@@ -41,8 +51,7 @@ def main() -> int:
             print(f"rows: {profile['row_count']}")
             print(f"columns: {profile['column_count']}")
             print("mode: agent")
-            for key in output_paths:
-                print(f"{key}: {output_paths[key]}")
+            _print_output_paths(output_paths)
             return 0
 
         df, metadata = load_dataset(args.input, sheet=args.sheet)

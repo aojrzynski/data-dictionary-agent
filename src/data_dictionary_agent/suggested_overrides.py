@@ -1,11 +1,17 @@
 from __future__ import annotations
 
+"""Generate review-oriented suggested overrides from dictionary caveats.
+
+This module highlights columns where human clarification is useful. It does not
+change the authoritative deterministic outputs.
+"""
 from typing import Any
 
 from data_dictionary_agent.constants import CONFIG_PROVENANCE_CAVEAT
 
 
 def build_suggested_overrides(dictionary: dict[str, Any]) -> dict[str, Any]:
+    """Build a YAML-friendly template focused on fields needing review."""
     dataset = dictionary.get("dataset", {})
     out: dict[str, Any] = {
         "dataset": {
