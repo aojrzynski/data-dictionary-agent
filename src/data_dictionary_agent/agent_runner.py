@@ -45,10 +45,14 @@ def run_agent(input_path: str, output_dir: str, sheet: str | None = None, config
                 "suggested_action": "Confirm semantic role, description, and handling requirements.",
             })
 
+    agent_trace_path = Path(output_dir) / "agent_trace.json"
+    agent_report_path = Path(output_dir) / "agent_report.md"
     output_files = {
         "profiling_trace": str(profiling_trace_path),
         **{k: str(v) for k, v in dictionary_paths.items()},
         "suggested_overrides_yaml": str(suggested_path),
+        "agent_trace": str(agent_trace_path),
+        "agent_report": str(agent_report_path),
     }
 
     agent_trace = {
@@ -84,10 +88,9 @@ def run_agent(input_path: str, output_dir: str, sheet: str | None = None, config
             "output_files": output_files,
         },
     }
-    agent_report_text = build_agent_report(agent_trace)
-    output_files["agent_trace"] = str(write_agent_trace(agent_trace, output_dir))
-    output_files["agent_report"] = str(write_agent_report(agent_report_text, output_dir))
     agent_trace["summary"]["output_files"] = output_files
+    agent_report_text = build_agent_report(agent_trace)
     write_agent_trace(agent_trace, output_dir)
+    write_agent_report(agent_report_text, output_dir)
 
     return {"profile": profile, "dictionary": dictionary, "suggested_overrides": suggested, "output_paths": output_files, "agent_trace": agent_trace, "agent_report_text": agent_report_text}
