@@ -10,7 +10,8 @@ Optional LLM description suggestions are a wording layer, not a truth layer.
 - No full raw rows are sent to the LLM.
 - Non-sensitive sample/top values are capped and truncated.
 - If no API key is available, fallback suggestions are generated.
-- If LLM output is invalid, fallback suggestions are generated.
+- LLM output is requested as JSON and then validated/parsing-checked.
+- If LLM JSON parsing or validation fails, fallback suggestions are generated.
 
 ## Review expectations
 

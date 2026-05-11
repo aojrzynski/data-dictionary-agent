@@ -30,6 +30,7 @@ def request_llm_suggestions(prompt: str, model: str | None = None, client: objec
             model=chosen_model,
             input=prompt,
             temperature=0,
+            response_format={"type": "json_object"},
         )
         return response.output_text, warnings, True, chosen_model
     except Exception as exc:

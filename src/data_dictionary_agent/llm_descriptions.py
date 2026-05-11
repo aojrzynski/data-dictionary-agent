@@ -63,6 +63,27 @@ def _build_prompt(summary: dict) -> str:
     )
 
 
+def _extract_json_text(text: str) -> str:
+    stripped = text.strip()
+    if not stripped:
+        return stripped
+    if stripped.startswith("{") and stripped.endswith("}"):
+        return stripped
+    if "```" in stripped:
+        parts = stripped.split("```")
+        for i in range(1, len(parts), 2):
+            block = parts[i].strip()
+            if block.lower().startswith("json"):
+                block = block[4:].strip()
+            if block.startswith("{") and block.endswith("}"):
+                return block
+    first = stripped.find("{")
+    last = stripped.rfind("}")
+    if first != -1 and last != -1 and first < last:
+        return stripped[first : last + 1]
+    return stripped
+
+
 def build_deterministic_fallback_suggestions(dictionary: dict, reason: str) -> dict:
     columns = []
     for c in dictionary.get("columns", []):
@@ -93,7 +114,7 @@ def generate_llm_description_suggestions(dictionary: dict, model: str | None = N
     # Validate response shape strictly; fallback keeps outputs predictable.
     if llm_used and text:
         try:
-            candidate = json.loads(text)
+            candidate = json.loads(_extract_json_text(text))
             if isinstance(candidate, dict) and isinstance(candidate.get("columns"), list):
                 parsed = candidate
                 source = "llm_suggested"
@@ -102,7 +123,7 @@ def generate_llm_description_suggestions(dictionary: dict, model: str | None = N
                 llm_used = False
                 source = "deterministic_fallback"
         except Exception:
-            warnings.append("LLM response was not valid JSON; deterministic fallback suggestions were generated.")
+            warnings.append("LLM response could not be parsed as valid JSON; deterministic fallback suggestions were generated.")
             llm_used = False
             source = "deterministic_fallback"
     by_name = {c.get("column_name"): c for c in parsed.get("columns", []) if c.get("column_name")}
