@@ -1,9 +1,9 @@
-from __future__ import annotations
-
 """Markdown report builder for agent-mode run summaries.
 
 Reports restate the recorded trace in a reader-friendly format.
 """
+
+from __future__ import annotations
 
 def build_agent_report(agent_trace: dict) -> str:
     """Render an agent trace into a markdown report."""

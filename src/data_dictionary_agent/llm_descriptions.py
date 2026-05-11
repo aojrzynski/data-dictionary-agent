@@ -1,10 +1,11 @@
-from __future__ import annotations
-
 """Optional LLM wording suggestions built from safe deterministic summaries.
 
 This module prepares redacted/capped metadata for LLM prompting and validates
 responses. It never overwrites deterministic dictionary outputs.
 """
+
+from __future__ import annotations
+
 import json
 from datetime import datetime, timezone
 
@@ -22,11 +23,20 @@ def build_llm_safe_summary(dictionary: dict, sample_limit: int = 3) -> dict:
     for c in dictionary.get("columns", []):
         sensitive = c.get("semantic_role") == "possible_sensitive" or bool(c.get("sensitivity_hint"))
         safe = {
-            "column_name": c.get("column_name"), "display_name": c.get("display_name"), "physical_type": c.get("physical_type"),
-            "semantic_role": c.get("semantic_role"), "semantic_role_confidence": c.get("semantic_role_confidence"), "null_ratio": c.get("null_ratio"),
-            "distinct_count": c.get("distinct_count"), "uniqueness_ratio": c.get("uniqueness_ratio"), "current_description": c.get("description"),
-            "description_source": c.get("description_source"), "review_required": c.get("review_required"), "review_notes": c.get("review_notes", []),
-            "caveats": c.get("caveats", []), "allowed_values": c.get("allowed_values", []),
+            "column_name": c.get("column_name"),
+            "display_name": c.get("display_name"),
+            "physical_type": c.get("physical_type"),
+            "semantic_role": c.get("semantic_role"),
+            "semantic_role_confidence": c.get("semantic_role_confidence"),
+            "null_ratio": c.get("null_ratio"),
+            "distinct_count": c.get("distinct_count"),
+            "uniqueness_ratio": c.get("uniqueness_ratio"),
+            "current_description": c.get("description"),
+            "description_source": c.get("description_source"),
+            "review_required": c.get("review_required"),
+            "review_notes": c.get("review_notes", []),
+            "caveats": c.get("caveats", []),
+            "allowed_values": c.get("allowed_values", []),
         }
         # Redact likely sensitive values before any optional LLM usage.
         if sensitive:
@@ -35,7 +45,10 @@ def build_llm_safe_summary(dictionary: dict, sample_limit: int = 3) -> dict:
             safe["redaction_reason"] = "Column is possible_sensitive or has a sensitivity hint."
         else:
             safe["sample_values"] = [_truncate(v) for v in (c.get("sample_values") or [])[:sample_limit]]
-            safe["top_values"] = [{"value": _truncate(i.get("value")), "count": i.get("count")} for i in (c.get("top_values") or [])[:sample_limit]]
+            safe["top_values"] = [
+                {"value": _truncate(i.get("value")), "count": i.get("count")}
+                for i in (c.get("top_values") or [])[:sample_limit]
+            ]
         cols.append(safe)
     return {"dataset": dictionary.get("dataset", {}), "columns": cols}
 
@@ -53,8 +66,18 @@ def _build_prompt(summary: dict) -> str:
 def build_deterministic_fallback_suggestions(dictionary: dict, reason: str) -> dict:
     columns = []
     for c in dictionary.get("columns", []):
-        desc = c.get("description") or f"Field '{c.get('display_name') or c.get('column_name')}' with semantic role '{c.get('semantic_role')}'."
-        columns.append({"column_name": c.get("column_name"), "suggested_description": desc, "confidence": "low", "notes": [reason]})
+        desc = (
+            c.get("description")
+            or f"Field '{c.get('display_name') or c.get('column_name')}' with semantic role '{c.get('semantic_role')}'."
+        )
+        columns.append(
+            {
+                "column_name": c.get("column_name"),
+                "suggested_description": desc,
+                "confidence": "low",
+                "notes": [reason],
+            }
+        )
     return {"columns": columns}
 
 
@@ -102,8 +125,14 @@ def generate_llm_description_suggestions(dictionary: dict, model: str | None = N
             "notes": pick.get("notes", []),
         })
     payload = {
-        "generated_at_utc": datetime.now(timezone.utc).isoformat(), "llm_requested": True, "llm_call_succeeded": llm_call_succeeded, "llm_used": llm_used,
-        "model": chosen_model, "source": source,
-        "data_boundary": "Only safe summaries were used. Raw row-level data was not sent.", "warnings": warnings, "columns": out_cols,
+        "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+        "llm_requested": True,
+        "llm_call_succeeded": llm_call_succeeded,
+        "llm_used": llm_used,
+        "model": chosen_model,
+        "source": source,
+        "data_boundary": "Only safe summaries were used. Raw row-level data was not sent.",
+        "warnings": warnings,
+        "columns": out_cols,
     }
     return summary, payload

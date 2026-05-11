@@ -1,10 +1,10 @@
-from __future__ import annotations
-
 """Generate review-oriented suggested overrides from dictionary caveats.
 
 This module highlights columns where human clarification is useful. It does not
 change the authoritative deterministic outputs.
 """
+
+from __future__ import annotations
 from typing import Any
 
 from data_dictionary_agent.constants import CONFIG_PROVENANCE_CAVEAT

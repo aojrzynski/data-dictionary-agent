@@ -1,10 +1,10 @@
-from __future__ import annotations
-
 """Config loading and validation for optional dictionary overrides.
 
 This module accepts user-provided context (display names, descriptions, roles)
 and validates its structure. It does not mutate profiling evidence itself.
 """
+
+from __future__ import annotations
 
 from pathlib import Path
 from typing import Any

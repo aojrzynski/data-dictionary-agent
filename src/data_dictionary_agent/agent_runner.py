@@ -1,10 +1,10 @@
-from __future__ import annotations
-
 """Bounded agent-mode orchestration over deterministic pipeline components.
 
 Agent mode coordinates existing deterministic modules, records decisions and
 review items, and writes trace/report artifacts. It is not open-ended autonomy.
 """
+
+from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
@@ -115,12 +115,45 @@ def run_agent(
         "run_id": str(uuid.uuid4()),
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "mode": "agent",
-        "input": {"input_path": input_path, "sheet": sheet, "config_path": config_path, "sample_size": sample_size, "top_values_limit": top_values_limit},
+        "input": {
+            "input_path": input_path,
+            "sheet": sheet,
+            "config_path": config_path,
+            "sample_size": sample_size,
+            "top_values_limit": top_values_limit,
+        },
         "plan": plan["steps"],
         "decisions": [
-            {"decision_id": "d1", "decision": "Config override usage", "rationale": "Config overrides were applied because --config was provided." if config_path else "Config overrides were not applied because --config was not provided.", "evidence": [config_path or "no config path"]},
-            {"decision_id": "d2", "decision": "Suggested overrides generation", "rationale": "Suggested overrides were generated because review-required fields exist." if review_items else "Suggested overrides still emitted for consistency even when no review-required fields exist.", "evidence": [f"review_items={len(review_items)}"]},
-            {"decision_id": "d3", "decision": "LLM behavior", "rationale": "LLM description suggestions were requested." if llm_descriptions else "LLM description suggestions were not requested.", "evidence": [f"llm_used={llm_used}", f"source={llm_source}"]},
+            {
+                "decision_id": "d1",
+                "decision": "Config override usage",
+                "rationale": (
+                    "Config overrides were applied because --config was provided."
+                    if config_path
+                    else "Config overrides were not applied because --config was not provided."
+                ),
+                "evidence": [config_path or "no config path"],
+            },
+            {
+                "decision_id": "d2",
+                "decision": "Suggested overrides generation",
+                "rationale": (
+                    "Suggested overrides were generated because review-required fields exist."
+                    if review_items
+                    else "Suggested overrides still emitted for consistency even when no review-required fields exist."
+                ),
+                "evidence": [f"review_items={len(review_items)}"],
+            },
+            {
+                "decision_id": "d3",
+                "decision": "LLM behavior",
+                "rationale": (
+                    "LLM description suggestions were requested."
+                    if llm_descriptions
+                    else "LLM description suggestions were not requested."
+                ),
+                "evidence": [f"llm_used={llm_used}", f"source={llm_source}"],
+            },
         ],
         "assumptions": [
             {
@@ -142,7 +175,11 @@ def run_agent(
             "row_count": profile.get("row_count", 0),
             "column_count": profile.get("column_count", 0),
             "columns_needing_review": len(review_items),
-            "possible_sensitive_fields": sum(1 for c in dictionary.get("columns", []) if c.get("semantic_role") == "possible_sensitive"),
+            "possible_sensitive_fields": sum(
+                1
+                for c in dictionary.get("columns", [])
+                if c.get("semantic_role") == "possible_sensitive"
+            ),
             "config_used": bool(config_path),
             "output_files": output_files,
         },
@@ -152,4 +189,11 @@ def run_agent(
     write_agent_trace(agent_trace, output_dir)
     write_agent_report(agent_report_text, output_dir)
 
-    return {"profile": profile, "dictionary": dictionary, "suggested_overrides": suggested, "output_paths": output_files, "agent_trace": agent_trace, "agent_report_text": agent_report_text}
+    return {
+        "profile": profile,
+        "dictionary": dictionary,
+        "suggested_overrides": suggested,
+        "output_paths": output_files,
+        "agent_trace": agent_trace,
+        "agent_report_text": agent_report_text,
+    }

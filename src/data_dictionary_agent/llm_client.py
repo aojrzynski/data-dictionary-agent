@@ -1,10 +1,10 @@
-from __future__ import annotations
-
 """Thin wrapper for optional LLM calls used in description suggestion mode.
 
 If credentials/client support are unavailable, deterministic fallback behavior
 is surfaced to callers via warnings and status flags.
 """
+
+from __future__ import annotations
 
 import os
 

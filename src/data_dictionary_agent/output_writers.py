@@ -1,10 +1,10 @@
-from __future__ import annotations
-
 """Writers for deterministic, agent, and optional LLM output artifacts.
 
 This module serializes prepared structures to stable filenames/formats. It does
 not build profiling evidence or inference decisions.
 """
+
+from __future__ import annotations
 import csv
 import json
 from pathlib import Path

@@ -1,11 +1,11 @@
-from __future__ import annotations
-
 """Deterministic physical profiling for observed dataset evidence.
 
 This module computes observable column facts (nulls, distinct counts, type-like
 patterns, samples, value ranges). It is the authoritative evidence layer for
 what appears in the file and does not infer business truth on its own.
 """
+
+from __future__ import annotations
 
 from collections import Counter
 from datetime import datetime, timezone

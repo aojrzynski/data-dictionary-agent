@@ -1,6 +1,6 @@
-from __future__ import annotations
-
 """Writer for deterministic profiling trace evidence."""
+
+from __future__ import annotations
 import json
 from pathlib import Path
 

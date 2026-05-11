@@ -1,10 +1,10 @@
-from __future__ import annotations
-
 """Plan builder for bounded agent-mode orchestration.
 
 The planner records intended deterministic steps and context notes so runs are
 auditable. It does not execute profiling or inference itself.
 """
+
+from __future__ import annotations
 from typing import Any
 
 

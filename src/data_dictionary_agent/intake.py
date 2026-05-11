@@ -1,10 +1,10 @@
-from __future__ import annotations
-
 """Dataset intake utilities for local CSV/XLSX/XLSM files.
 
 This module validates file paths and loads tabular data into pandas plus basic
 source metadata. It does not profile values, infer semantics, or apply config.
 """
+
+from __future__ import annotations
 
 from pathlib import Path
 

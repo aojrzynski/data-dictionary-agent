@@ -1,10 +1,10 @@
-from __future__ import annotations
-
 """Deterministic semantic suggestion rules for profiled columns.
 
 This module maps observed profile facts and column-name hints to likely
 semantic roles. These are suggestions, not confirmed business definitions.
 """
+
+from __future__ import annotations
 
 import re
 from typing import Any
