@@ -39,3 +39,9 @@
 ## Trace writing layer
 
 `trace_writer.py` remains focused on `profiling_trace.json`.
+
+
+## Milestone 5 layers
+- Planner layer (`planner.py`)
+- Agent runner layer (`agent_runner.py`)
+- Agent reporting layer (`agent_reporting.py`)

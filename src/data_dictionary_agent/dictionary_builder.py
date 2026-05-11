@@ -39,6 +39,7 @@ def build_data_dictionary(profile: dict[str, Any], config: dict[str, Any] | None
     entries: list[dict[str, Any]] = []
     for column in profile.get("columns", []):
         col_overrides = get_column_overrides(config, str(column.get("column_name", "")))
+        role_overridden = "semantic_role" in col_overrides
         role = col_overrides.get("semantic_role", column.get("semantic_role", "unknown"))
         review_required = bool(col_overrides.get("review_required", column.get("review_required", False)))
         description, description_source = _description_for(role, review_required)
@@ -46,7 +47,12 @@ def build_data_dictionary(profile: dict[str, Any], config: dict[str, Any] | None
             description, description_source = col_overrides.get("description", ""), "config_override"
         caveats = list(column.get("notes", [])) + list(column.get("review_notes", [])) + list(col_overrides.get("caveats", []))
 
-        if column.get("semantic_role_confidence") == "low":
+        role_confidence = col_overrides.get("semantic_role_confidence", column.get("semantic_role_confidence"))
+        if role_overridden and "semantic_role_confidence" not in col_overrides:
+            role_confidence = "medium"
+            caveats.append("Semantic role was provided by config; confidence reflects user-provided context, not deterministic inference.")
+
+        if column.get("semantic_role_confidence") == "low" and not role_overridden:
             caveats.append("Field requires review because semantic confidence is low.")
         if role == "identifier" and float(column.get("uniqueness_ratio", 0.0) or 0.0) < 0.95:
             caveats.append("Identifier-like field is not unique.")
@@ -65,7 +71,7 @@ def build_data_dictionary(profile: dict[str, Any], config: dict[str, Any] | None
             "physical_type": column.get("inferred_physical_type"),
             "semantic_role": role,
             "semantic_role_source": "config_override" if "semantic_role" in col_overrides else "deterministic_inference",
-            "semantic_role_confidence": col_overrides.get("semantic_role_confidence", column.get("semantic_role_confidence")),
+            "semantic_role_confidence": role_confidence,
             "nullable": int(column.get("null_count", 0)) > 0,
             "null_count": column.get("null_count", 0),
             "null_ratio": column.get("null_ratio", 0.0),

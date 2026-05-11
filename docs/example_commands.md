@@ -15,3 +15,7 @@ Expected output files in each output directory:
 - `data_dictionary.json`
 
 - With config: `python -m data_dictionary_agent.cli --input sample_data/crm_contacts/contacts_clean.csv --config config/examples/crm_context.yaml --output-dir outputs/crm_contacts_with_config`
+
+
+## Agent mode
+`python -m data_dictionary_agent.cli --input sample_data/crm_contacts/contacts_clean.csv --config config/examples/crm_context.yaml --mode agent --output-dir outputs/crm_contacts_agent`

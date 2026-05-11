@@ -53,3 +53,7 @@ Each run writes `suggested_overrides.yaml`, an editable file containing fields t
 - No agent mode yet
 - No LLM-generated descriptions yet
 - No formal sensitive-data compliance classification
+
+
+## Agent mode (Milestone 5)
+Use `--mode agent` for bounded deterministic orchestration and review artifacts (`agent_trace.json`, `agent_report.md`). No LLM is used.

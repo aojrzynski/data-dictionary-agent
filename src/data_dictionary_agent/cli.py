@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import sys
 
+from data_dictionary_agent.agent_runner import run_agent
 from data_dictionary_agent.config import load_config
 from data_dictionary_agent.dictionary_builder import build_data_dictionary
 from data_dictionary_agent.intake import load_dataset
@@ -20,6 +21,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--sample-size", type=int, default=5)
     parser.add_argument("--top-values-limit", type=int, default=5)
     parser.add_argument("--config", help="Optional YAML config overrides", default=None)
+    parser.add_argument("--mode", choices=["deterministic", "agent"], default="deterministic")
     return parser
 
 
@@ -28,6 +30,18 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
+        if args.mode == "agent":
+            result = run_agent(args.input, args.output_dir, sheet=args.sheet, config_path=args.config, sample_size=args.sample_size, top_values_limit=args.top_values_limit)
+            profile = result["profile"]
+            output_paths = result["output_paths"]
+            print("profiling completed")
+            print(f"rows: {profile['row_count']}")
+            print(f"columns: {profile['column_count']}")
+            print("mode: agent")
+            for key in ["profiling_trace", "data_dictionary_md", "data_dictionary_csv", "data_dictionary_json", "suggested_overrides_yaml", "agent_trace", "agent_report"]:
+                print(f"{key}: {output_paths[key]}")
+            return 0
+
         df, metadata = load_dataset(args.input, sheet=args.sheet)
         profile = build_profile(df, metadata, sample_size=args.sample_size, top_values_limit=args.top_values_limit)
         config = load_config(args.config)
@@ -38,6 +52,7 @@ def main() -> int:
         print("profiling completed")
         print(f"rows: {profile['row_count']}")
         print(f"columns: {profile['column_count']}")
+        print("mode: deterministic")
         print(f"profiling_trace: {output_path}")
         print(f"data_dictionary_md: {dictionary_paths['data_dictionary_md']}")
         print(f"data_dictionary_csv: {dictionary_paths['data_dictionary_csv']}")

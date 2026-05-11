@@ -11,3 +11,8 @@
 No LLM calls or agent orchestration occur in this milestone.
 
 Pipeline: intake -> profiling -> semantic inference -> optional config overrides -> dictionary builder -> output writers -> suggested overrides.
+
+
+## Pipelines
+- Deterministic: intake -> profiling -> semantic inference -> config overrides -> dictionary -> outputs -> suggested overrides
+- Agent: deterministic pipeline + planner/review/decision trace/report
