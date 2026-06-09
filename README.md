@@ -2,6 +2,15 @@
 
 Data Dictionary Agent is a local-first, CLI-first Python tool that profiles CSV/XLSX/XLSM datasets and produces first-pass data dictionary artifacts. It combines deterministic profiling, deterministic semantic inference, human-provided config context, bounded agent orchestration, and optional LLM wording suggestions without making the LLM the source of truth.
 
+> [!NOTE]
+> **Part of the Data Agent Suite.**
+> 
+> This repo is one of 10 local-first data/AI agents built around practical data workflows, deterministic evidence, bounded LLM use, and review-ready artifacts.
+> 
+> The full ordered list of agents is included near the bottom of this README.
+> 
+> See the full suite overview: [Data Agent Suite](https://aojrzynski.github.io/agents/)
+
 ## Why this exists
 
 Documenting datasets by hand is repetitive and often inconsistent.
@@ -198,3 +207,22 @@ python -m pytest
 - `docs/agent_mode.md`
 - `docs/release_checklist.md`
 - `FUTURE_WORK.md`
+
+---
+
+> [!NOTE]
+> **Data Agent Suite**  
+> This repo is part of the **Data Agent Suite**: 10 local-first data/AI agents focused on practical data workflows, deterministic evidence, bounded LLM use, and review-ready artifacts.
+> 
+> See the full suite overview: [Data Agent Suite](https://aojrzynski.github.io/agents/)
+>
+> 1. [Data Quality Triage Agent](https://github.com/aojrzynski/data-quality-triage-agent)
+> 2. [Data Reconciliation Agent](https://github.com/aojrzynski/data-reconciliation-agent)
+> 3. **Data Dictionary Agent**
+> 4. [Data Contract Review Agent](https://github.com/aojrzynski/data-contract-review-agent)
+> 5. [Sensitive Field Review Agent](https://github.com/aojrzynski/sensitive-field-review-agent)
+> 6. [Data Test Suggestion Agent](https://github.com/aojrzynski/data-test-suggestion-agent)
+> 7. [Dataset Onboarding Reviewer Workflow](https://github.com/aojrzynski/dataset-onboarding-reviewer-workflow)
+> 8. [Data Quality Investigation Workflow](https://github.com/aojrzynski/data-quality-investigation-workflow)
+> 9. [Project Evidence Review Agent](https://github.com/aojrzynski/project-evidence-review-agent)
+> 10. [Data Migration Readiness Review Agent](https://github.com/aojrzynski/data-migration-readiness-review-agent)
